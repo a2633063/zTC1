@@ -35,10 +35,10 @@
 
 #define APP_INFO   "MiCO BASIC Demo"
 
-#define FIRMWARE_REVISION   "MICO_BASIC_1_0"
-#define MANUFACTURER        "MXCHIP Inc."
-#define SERIAL_NUMBER       "20140606"
-#define PROTOCOL            "com.mxchip.basic"
+#define FIRMWARE_REVISION   "ZYC_BASIC_1_0"
+#define MANUFACTURER        "ZYC Inc."
+#define SERIAL_NUMBER       "20190105"
+#define PROTOCOL            "com.zyc.basic"
 
 /************************************************************************
  * Application thread stack size */

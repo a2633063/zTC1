@@ -15,6 +15,7 @@ static void key_long_press(void)
 {
     os_log("key_long_press");
     MicoGpioOutputHigh(MICO_GPIO_5);
+
 }
 static void key_short_press(void)
 {

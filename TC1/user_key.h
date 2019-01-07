@@ -1,6 +1,6 @@
 
-#ifndef __KEY_H_
-#define __KEY_H_
+#ifndef __USER_KEY_H_
+#define __USER_KEY_H_
 
 
 #include "mico.h"

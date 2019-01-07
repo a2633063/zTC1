@@ -1,6 +1,7 @@
 #include "main.h"
-#include "key.h"
-#include "wifi.h"
+
+#include "user_key.h"
+#include "user_wifi.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 

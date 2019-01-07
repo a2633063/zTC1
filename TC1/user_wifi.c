@@ -1,6 +1,9 @@
+#include "user_wifi.h"
+
 #include "main.h"
-#include "wifi.h"
-#include "key.h"
+#include "mico_socket.h"
+#include "user_sntp.h"
+#include "user_key.h"
 
 #define os_log(format, ...)  custom_log("WIFI", format, ##__VA_ARGS__)
 
@@ -31,7 +34,7 @@ void wifi_start_easylink( )
     micoWlanStartEasyLink( 20000 );
     led( 1 );
 }
-
+uint32_t ip=0xd248912c;
 //easylink 完成回调
 void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg )
 {
@@ -60,21 +63,12 @@ void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg
     os_log("EasyLink stop");
     micoWlanStopEasyLink( );
 }
+
 //wifi已连接获取到IP地址 回调
 static void wifi_get_ip_callback( IPStatusTypedef *pnet, void * arg )
 {
     os_log("got IP:%s", pnet->ip);
     wifi_status = WIFI_STATE_CONNECTED;
-
-//    /* Store SSID and KEY*/
-//    mico_rtos_lock_mutex( &inContext->flashContentInRam_mutex );
-//    memcpy( inContext->flashContentInRam.micoSystemConfig.ssid, nwkpara->wifi_ssid, maxSsidLen );
-//    memset( inContext->flashContentInRam.micoSystemConfig.bssid, 0x0, 6 );
-//    memcpy( inContext->flashContentInRam.micoSystemConfig.user_key, nwkpara->wifi_key, maxKeyLen );
-//    inContext->flashContentInRam.micoSystemConfig.user_keyLength = strlen( nwkpara->wifi_key );
-//    inContext->flashContentInRam.micoSystemConfig.dhcpEnable = true;
-//    mico_rtos_unlock_mutex( &inContext->flashContentInRam_mutex );
-//    system_log("Get SSID: %s, Key: %s", inContext->flashContentInRam.micoSystemConfig.ssid, inContext->flashContentInRam.micoSystemConfig.user_key);
 
 }
 //wifi连接状态改变回调
@@ -106,7 +100,7 @@ static void wifi_led_timer_callback( void* arg )
             break;
 
         case WIFI_STATE_CONNECTING:
-            if ( num > 2 )
+            if ( num > 1 )
             {
                 num = 0;
                 led( -1 );
@@ -146,7 +140,7 @@ void wifi_init( void )
     mico_system_notify_register( mico_notify_DHCP_COMPLETED, (void *) wifi_get_ip_callback, NULL );
     //wifi连接状态改变回调
     mico_system_notify_register( mico_notify_WIFI_STATUS_CHANGED, (void*) wifi_status_callback, NULL );
-
+    sntp_init();
     //启动定时器开始进行wifi连接
     if ( !mico_rtos_is_timer_running( &wifi_led_timer ) ) mico_rtos_start_timer( &wifi_led_timer );
 

@@ -1,6 +1,6 @@
 
-#ifndef __WIFI_H_
-#define __WIFI_H_
+#ifndef __USER_WIFI_H_
+#define __USER_WIFI_H_
 
 
 #include "mico.h"
