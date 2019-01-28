@@ -41,5 +41,5 @@ void sntp_init(void)
 {
     struct in_addr ipp;ipp.s_addr=0xd248912c;
     sntp_set_server_ip_address (0,ipp);
-    sntp_start_auto_time_sync (15000,  sntp_time_call_back);
+    sntp_start_auto_time_sync (86400000,  sntp_time_call_back);        //每小时校准一次
 }

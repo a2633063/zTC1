@@ -2,6 +2,7 @@
 
 #include "user_key.h"
 #include "user_wifi.h"
+#include "user_mqtt_client.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 
@@ -44,6 +45,7 @@ int application_start( void )
 
     wifi_init( );
     key_init( );
+    user_mqtt_init();
 //    wifi_start_easylink();
     while ( 1 )
     {

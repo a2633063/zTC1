@@ -100,7 +100,7 @@ static void wifi_led_timer_callback( void* arg )
             break;
 
         case WIFI_STATE_CONNECTING:
-            if ( num > 1 )
+            //if ( num > 1 )
             {
                 num = 0;
                 led( -1 );

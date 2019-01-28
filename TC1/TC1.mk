@@ -27,6 +27,8 @@ NAME := App_TC1
 $(NAME)_SOURCES := main.c\
 				   user_wifi.c\
 				   user_key.c\
-				   user_sntp.c
+				   user_sntp.c\
+				   user_mqtt_client.c
 				   
-$(NAME)_COMPONENTS := protocols/SNTP
+$(NAME)_COMPONENTS := protocols/SNTP\
+					protocols/mqtt

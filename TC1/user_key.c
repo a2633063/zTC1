@@ -2,7 +2,8 @@
 #define os_log(format, ...)  custom_log("KEY", format, ##__VA_ARGS__)
 
 #include "main.h"
-//#include "key.h"
+//#include "user_key.h"
+#include "user_mqtt_client.h"
 
 void led(char x)
 {
@@ -15,6 +16,7 @@ static void key_long_press(void)
 {
     os_log("key_long_press");
     MicoGpioOutputHigh(MICO_GPIO_5);
+    user_mqtt_send("mqtt test");
 
 }
 static void key_short_press(void)
