@@ -2,7 +2,7 @@
 
 #include "main.h"
 #include "user_key.h"
-#include "cJSON.h"
+#include "cJSON/cJSON.h"
 
 typedef struct _user_json_context_t
 {
@@ -28,9 +28,9 @@ void user_function_cmd_received( uint8_t *pusrdata )
     cJSON *p_name = cJSON_GetObjectItem( pJsonRoot, "name" );
 
     if (
-    (p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint == 2)
-    || (p_description && cJSON_IsString( p_description ) && strcmp( p_description->valuestring, "123" ) == 0)
-    || (p_name && cJSON_IsString( p_name ) && strcmp( p_name->valuestring, sys_config->micoSystemConfig.name ) == 0)
+    (p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint == 2)  //idx
+    || (p_description && cJSON_IsString( p_description ) && strcmp( p_description->valuestring, "123" ) == 0)   //description mqttid
+    || (p_name && cJSON_IsString( p_name ) && strcmp( p_name->valuestring, sys_config->micoSystemConfig.name ) == 0)    //name
     )
     {
         cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );

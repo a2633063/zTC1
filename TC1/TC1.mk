@@ -25,7 +25,7 @@
 NAME := App_TC1
 
 $(NAME)_SOURCES := main.c\
-				   cJSON.c\
+				   cJSON/cJSON.c\
 				   user_wifi.c\
 				   user_key.c\
 				   user_sntp.c\
