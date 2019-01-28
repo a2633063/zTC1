@@ -21,7 +21,7 @@
 #include "main.h"
 #include "mico.h"
 #include "MQTTClient.h"
-
+#include "user_function.h"
 /******************************************************
  *                      Macros
  ******************************************************/
@@ -37,7 +37,8 @@
 #define MQTT_CLIENT_USERNAME    "z"
 #define MQTT_CLIENT_PASSWORD    "2633063"
 #define MQTT_CLIENT_KEEPALIVE   30
-#define MQTT_CLIENT_SUB_TOPIC   "test/mico/test0"  // loop msg
+#define MQTT_CLIENT_SUB_TOPIC1   "test/mico/test0"  // loop msg
+#define MQTT_CLIENT_SUB_TOPIC2   "domoticz/out"  // loop msg
 #define MQTT_CLIENT_PUB_TOPIC   "test/mico/test1"
 #define MQTT_CMD_TIMEOUT        5000  // 5s
 #define MQTT_YIELD_TMIE         5000  // 5s
@@ -279,10 +280,14 @@ MQTT_start:
     mqtt_log("MQTT client connect success!");
 
     /* 4. mqtt client subscribe */
-    rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC, QOS0, messageArrived );
+    rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC1, QOS0, messageArrived );
     require_noerr_string(rc, MQTT_reconnect, "ERROR: MQTT client subscribe err.");
+    mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC1);
 
-    mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC);
+
+    rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC2, QOS0, messageArrived );
+    require_noerr_string(rc, MQTT_reconnect, "ERROR: MQTT client subscribe err.");
+    mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC2);
 
     /* 5. client loop for recv msg && keepalive */
     while ( 1 )
@@ -385,6 +390,7 @@ OSStatus user_recv_handler( void *arg )
     require( p_recv_msg, exit );
 
     app_log("user get data success! from_topic=[%s], msg=[%ld][%s].\r\n", p_recv_msg->topic, p_recv_msg->datalen, p_recv_msg->data);
+    user_function_cmd_received(p_recv_msg->data);
     free( p_recv_msg );
 
 exit:

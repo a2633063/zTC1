@@ -30,10 +30,10 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 - [x] wifi (断连)自动连接
 
-- [x] app SmartConfig配置wifi连接
+- [x] app 直接配置wifi连接
 
 - [x] SNTP网络校时
-- [ ] MQTT客户端连接服务器
+- [x] MQTT客户端连接服务器
 - [ ] app控制每个接口单独开关
 - [ ] 配置每个接口单独定时开关
 - [ ] 配置每个接口单独倒计时开关
@@ -42,3 +42,12 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 
 
+根据以上功能,此项目针对EMW3031,需要完成以下功能
+
+
+- [x] 掉电保存数据
+- [x] wifi自动连接
+- [x] Easylink
+- [x] SNTP自动校时
+- [x] MQTT客户端连接服务器,订阅/发布主题
+- [x] Json 数据处理

@@ -25,10 +25,12 @@
 NAME := App_TC1
 
 $(NAME)_SOURCES := main.c\
+				   cJSON.c\
 				   user_wifi.c\
 				   user_key.c\
 				   user_sntp.c\
-				   user_mqtt_client.c
+				   user_mqtt_client.c\
+				   user_function.c
 				   
 $(NAME)_COMPONENTS := protocols/SNTP\
 					protocols/mqtt
