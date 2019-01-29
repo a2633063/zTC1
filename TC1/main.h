@@ -15,6 +15,9 @@
 #define Led         MICO_GPIO_5
 #define Button      MICO_GPIO_23
 
+#define Relay_ON     1
+#define Relay_OFF     0
+
 #define Relay_0     MICO_GPIO_6
 #define Relay_1     MICO_GPIO_7
 #define Relay_2     MICO_GPIO_8
@@ -30,6 +33,7 @@ typedef struct {
     char hour;      //小时
     char minute;    //分钟
     uint8_t repeat; //bit7:一次   bit6-0:周日-周一
+    char action;    //动作
     char on;    //开关
 
 } user_plug_task_config_t;

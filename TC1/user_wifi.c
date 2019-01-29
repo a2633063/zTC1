@@ -2,8 +2,8 @@
 
 #include "main.h"
 #include "mico_socket.h"
+#include "user_gpio.h"
 #include "user_sntp.h"
-#include "user_key.h"
 
 #define os_log(format, ...)  custom_log("WIFI", format, ##__VA_ARGS__)
 
@@ -32,7 +32,7 @@ void wifi_start_easylink( )
 {
     wifi_status = WIFI_STATE_EASYLINK;
     micoWlanStartEasyLink( 20000 );
-    led( 1 );
+    user_led_set( 1 );
 }
 uint32_t ip=0xd248912c;
 //easylink 完成回调
@@ -92,7 +92,7 @@ static void wifi_led_timer_callback( void* arg )
     {
         case WIFI_STATE_FAIL:
             os_log("wifi connect fail");
-            led( 0 );
+            user_led_set( 0 );
             mico_rtos_stop_timer( &wifi_led_timer );
             break;
         case WIFI_STATE_NOCONNECT:
@@ -103,17 +103,17 @@ static void wifi_led_timer_callback( void* arg )
             //if ( num > 1 )
             {
                 num = 0;
-                led( -1 );
+                user_led_set( -1 );
             }
             break;
         case WIFI_STATE_NOEASYLINK:
             wifi_start_easylink( );
             break;
         case WIFI_STATE_EASYLINK:
-            led( 1 );
+            user_led_set( 1 );
             break;
         case WIFI_STATE_CONNECTED:
-            led( 0 );
+            user_led_set( 0 );
             mico_rtos_stop_timer( &wifi_led_timer );
             break;
     }

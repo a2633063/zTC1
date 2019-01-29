@@ -2,7 +2,7 @@
 #define os_log(format, ...)  custom_log("SNTP", format, ##__VA_ARGS__)
 
 #include "main.h"
-//#include "key.h"
+//#include "user_gpio.h"
 #include "user_sntp.h"
 
 /* Callback function when MiCO UTC time in sync to NTP server */

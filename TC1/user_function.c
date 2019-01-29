@@ -1,7 +1,8 @@
+
 #define os_log(format, ...)  custom_log("FUNCTION", format, ##__VA_ARGS__)
 
 #include "main.h"
-#include "user_key.h"
+#include "user_gpio.h"
 #include "cJSON/cJSON.h"
 
 typedef struct _user_json_context_t
@@ -32,7 +33,7 @@ void user_function_cmd_received( uint8_t *pusrdata )
         cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
         if ( p_nvalue )
         {
-            led( p_nvalue->valueint );
+            user_led_set( p_nvalue->valueint );
 
             user_config->idx++;
             sys_config->micoSystemConfig.name[0]++;

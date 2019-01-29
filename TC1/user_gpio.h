@@ -6,7 +6,7 @@
 #include "mico.h"
 #include "MiCOKit_EXT.h"
 
-extern void led(char x);
+extern void user_led_set(char x);
 extern void key_init(void);
 
 

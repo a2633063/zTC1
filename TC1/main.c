@@ -1,6 +1,6 @@
 #include "main.h"
 
-#include "user_key.h"
+#include "user_gpio.h"
 #include "user_wifi.h"
 #include "user_rtc.h"
 #include "user_mqtt_client.h"
@@ -68,7 +68,7 @@ int application_start( void )
     }
 
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
-    led( 0 );
+    user_led_set( 0 );
 
     if ( user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
