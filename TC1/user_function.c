@@ -28,25 +28,16 @@ void user_function_cmd_received( uint8_t *pusrdata )
     cJSON *p_description = cJSON_GetObjectItem( pJsonRoot, "description" );
     cJSON *p_name = cJSON_GetObjectItem( pJsonRoot, "name" );
 
-    if ( p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint == 2 )  //idx
+    if ( p_idx && cJSON_IsNumber( p_idx ) && (p_idx->valueint>=3 &&p_idx->valueint<=9) )  //idx
     {
         cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
         if ( p_nvalue )
         {
             user_led_set( p_nvalue->valueint );
-
-            user_config->idx++;
-            sys_config->micoSystemConfig.name[0]++;
-            err=mico_system_context_update( sys_config );
-            os_log("err:%d[%d]",err,kNoErr);
+            user_relay_set(p_idx->valueint-3,p_nvalue->valueint);
         }
     }
-    else if ( p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint == 3 )  //idx
-    {
-        os_log("val:%d",user_config->idx);
-        os_log("name:%s",sys_config->micoSystemConfig.name);
-        os_log("seed:%d",sys_config->micoSystemConfig.seed);
-    }
+
 
     /*
      if (

@@ -34,8 +34,8 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 - [x] SNTP网络校时
 - [x] MQTT客户端连接服务器
-- [ ] app控制每个接口单独开关
-- [ ] 配置每个接口单独定时开关
+- [x] app控制每个接口单独开关(测试版本)
+- [x] 配置每个接口单独定时开关(未测试验证)
 - [ ] 配置每个接口单独倒计时开关
 - [ ] app实时显示功率
 - [ ] ~~根据功率自动开关~~
@@ -46,8 +46,19 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 
 - [x] 掉电保存数据
+
 - [x] wifi自动连接
+
 - [x] Easylink
+
 - [x] SNTP自动校时
+
 - [x] MQTT客户端连接服务器,订阅/发布主题
+
 - [x] Json 数据处理
+
+- [ ] MQTT设置各项配置
+
+- [ ] 单独提供一个UDP/TCP端口供配置
+
+  

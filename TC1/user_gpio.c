@@ -54,6 +54,7 @@ static void key_short_press( void )
 {
 //os_log("test");
     user_led_set(-1);
+    //user_relay_set(6,-1);
 }
 
 void key_init( void )
