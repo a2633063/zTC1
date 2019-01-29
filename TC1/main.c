@@ -22,7 +22,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME );
     user_config_t* userConfigDefault = user_config_data;
     userConfigDefault->idx = -1;
-
+    userConfigDefault->version=USER_CONFIG_VERSION;
     for(i=0;i<PLUG_NUM;i++)
     {
         userConfigDefault->plug[i].idx=-1;
@@ -36,6 +36,8 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
             userConfigDefault->plug[i].task[j].action=1;
         }
     }
+
+//    mico_system_context_update( sys_config );
 
 }
 
@@ -70,12 +72,13 @@ int application_start( void )
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
     user_led_set( 0 );
 
-    if ( user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
+    if (user_config->version!=USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
         os_log( "WARNGIN: user params restored!" );
         err = mico_system_context_restore( sys_config );
         require_noerr( err, exit );
     }
+    os_log( "version:%d",user_config->version );
     os_log( "idx:%d",user_config->idx );
     for ( i = 0; i < PLUG_NUM; i++ )
     {

@@ -28,15 +28,17 @@ void user_relay_set( char x, char y )
     else
         Gpiosetfunction = MicoGpioOutputLow;
 
+
     if ( x >= 0 && x < Relay_NUM )
     {
         (*Gpiosetfunction)( relay[x] );
+        os_log("set relay %d:%d",x,y);
     } else if ( x == Relay_NUM )
     {
-        OSStatus *setgpiofunction = MicoGpioOutputTrigger;
         for ( int i = 0; i < Relay_NUM; i++ )
         {
             (*Gpiosetfunction)( relay[i] );
+            os_log("set relay %d:%d",i,y);
         }
     }
 }

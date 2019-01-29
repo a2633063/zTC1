@@ -24,8 +24,26 @@ OSStatus user_sntp_get_time( )
     err = sntp_get_time( &ipp, &current_time );
     if ( err != kNoErr )
     {
-        os_log("sntp_get_time1 err = %d.retry", err);
-        ipp.s_addr = 0xd248912c;
+        os_log("sntp_get_time1 err = %d.", err);
+        hostent_content = gethostbyname( "cn.pool.ntp.org" );
+        pptr = hostent_content->h_addr_list;
+        ipp.s_addr = *(uint32_t *) (*pptr);
+        err = sntp_get_time( &ipp, &current_time );
+    }
+    if ( err != kNoErr )
+    {
+        os_log("sntp_get_time2 err = %d.", err);
+        hostent_content = gethostbyname( "s1a.time.edu.cn" );
+        pptr = hostent_content->h_addr_list;
+        ipp.s_addr = *(uint32_t *) (*pptr);
+        err = sntp_get_time( &ipp, &current_time );
+    }
+    if ( err != kNoErr )
+    {
+        os_log("sntp_get_time3 err = %d.", err);
+        hostent_content = gethostbyname( "ntp.sjtu.edu.cn" );
+        pptr = hostent_content->h_addr_list;
+        ipp.s_addr = *(uint32_t *) (*pptr);
         err = sntp_get_time( &ipp, &current_time );
     }
 
@@ -47,7 +65,7 @@ OSStatus user_sntp_get_time( )
     }
     else
     {
-        os_log("sntp_get_time2 err = %d.", err);
+        os_log("sntp_get_time4 err = %d.", err);
         return err;
     }
 
@@ -88,7 +106,7 @@ OSStatus user_rtc_init( void )
 
 void rtc_thread( mico_thread_arg_t arg )
 {
-    iso8601_time_t iso8601_time;
+    int i, j;
     OSStatus err = kUnknownErr;
     LinkStatusTypeDef LinkStatus;
     mico_rtc_time_t rtc_time;
@@ -128,6 +146,37 @@ void rtc_thread( mico_thread_arg_t arg )
 
 //        MicoRtcSetTime( &rtc_time );      //MicoRtc不自动走时!
         os_log("time:20%02d/%02d/%02d %d %02d:%02d:%02d",rtc_time.year,rtc_time.month,rtc_time.date,rtc_time.weekday,rtc_time.hr,rtc_time.min,rtc_time.sec);
+
+        char update_user_config_flag = 0;
+        for ( i = 0; i < PLUG_NUM; i++ )
+        {
+            for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
+            {
+                if ( user_config->plug[i].task[j].on != 0 )
+                {
+
+                    uint8_t repeat = user_config->plug[i].task[j].repeat;
+                    if (    //符合条件则改变继电器状态: 秒为0 时分符合设定值, 重复符合设定值
+                    rtc_time.sec == 0 && rtc_time.min == user_config->plug[i].task[j].minute
+                    && rtc_time.hr == user_config->plug[i].task[j].hour
+                    && ((repeat == 0x80) || repeat & (1 << (rtc_time.weekday - 1)))
+                    )
+                    {
+                        user_relay_set( i, user_config->plug[i].task[j].action );
+                        if ( repeat == 0x80 )
+                        {
+                            user_config->plug[i].task[j].on = 0;
+                            update_user_config_flag = 1;
+                        }
+                    }
+                }
+            }
+        }
+        if ( update_user_config_flag == 1 )
+        {
+            mico_system_context_update( sys_config );   //更新定时任务数据
+            update_user_config_flag = 0;
+        }
 
         if ( rtc_init != 1 || (rtc_time.sec == 0 && rtc_time.min == 0) ) //开机及每小时校准一次
         {

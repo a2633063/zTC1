@@ -5,6 +5,8 @@
 #include "MiCOKit_EXT.h"
 
 #define ZTC1_NAME "zTC1"
+#define USER_CONFIG_VERSION 1
+
 
 #define PLUG_NAME_LENGTH 32
 #define PLUG_NUM 6              //插座数量
@@ -47,6 +49,7 @@ typedef struct {
 
 //用户保存参数结构体
 typedef struct {
+    char version;
     char idx;
     user_plug_config_t plug[PLUG_NUM];
 } user_config_t;
