@@ -127,7 +127,6 @@ OSStatus user_mqtt_init( void *arg )
 {
     UNUSED_PARAMETER( arg );
     OSStatus err = kNoErr;
-    mico_Context_t* mico_context = NULL;
 
 #ifdef MQTT_CLIENT_SSL_ENABLE
     int mqtt_thread_stack_size = 0x3000;
@@ -137,13 +136,6 @@ OSStatus user_mqtt_init( void *arg )
     uint32_t mqtt_lib_version = MQTTClientLibVersion( );
     app_log( "MQTT client version: [%ld.%ld.%ld]",
              0xFF & (mqtt_lib_version >> 16), 0xFF & (mqtt_lib_version >> 8), 0xFF & mqtt_lib_version);
-
-    /* Create mico system context and read application's config data from flash */
-    mico_context = mico_system_context_init( 0 );
-
-    /* mico system initialize */
-    err = mico_system_init( mico_context );
-    require_noerr( err, exit );
 
     /* create mqtt msg send queue */
     err = mico_rtos_init_queue( &mqtt_msg_send_queue, "mqtt_msg_send_queue", sizeof(p_mqtt_send_msg_t),
