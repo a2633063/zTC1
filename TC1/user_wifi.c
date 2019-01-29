@@ -140,7 +140,7 @@ void wifi_init( void )
     mico_system_notify_register( mico_notify_DHCP_COMPLETED, (void *) wifi_get_ip_callback, NULL );
     //wifi连接状态改变回调
     mico_system_notify_register( mico_notify_WIFI_STATUS_CHANGED, (void*) wifi_status_callback, NULL );
-    sntp_init();
+    //sntp_init();
     //启动定时器开始进行wifi连接
     if ( !mico_rtos_is_timer_running( &wifi_led_timer ) ) mico_rtos_start_timer( &wifi_led_timer );
 

@@ -47,6 +47,8 @@ typedef struct {
     user_plug_config_t plug[PLUG_NUM];
 } user_config_t;
 
+
+extern char rtc_init;
 extern system_config_t * sys_config;
 extern user_config_t * user_config;
 

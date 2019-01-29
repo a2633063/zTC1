@@ -2,10 +2,12 @@
 
 #include "user_key.h"
 #include "user_wifi.h"
+#include "user_rtc.h"
 #include "user_mqtt_client.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 
+char rtc_init=0;
 system_config_t * sys_config;
 user_config_t * user_config;
 
@@ -31,6 +33,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
             userConfigDefault->plug[i].task[j].minute=0;
             userConfigDefault->plug[i].task[j].repeat=0x80;
             userConfigDefault->plug[i].task[j].on=0;
+            userConfigDefault->plug[i].task[j].action=1;
         }
     }
 
@@ -91,8 +94,10 @@ int application_start( void )
 
     wifi_init( );
     key_init( );
-    user_mqtt_init( );
-
+    err = user_mqtt_init( );
+    require_noerr( err, exit );
+    err = user_rtc_init();
+    require_noerr( err, exit );
     while ( 1 )
     {
 //        mico_thread_msleep(500);
@@ -101,6 +106,7 @@ int application_start( void )
 //        mico_rtos_delay_milliseconds(1000);
     }
     exit:
+    os_log("application_start ERROR!");
     return 0;
 }
 

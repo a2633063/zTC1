@@ -42,8 +42,6 @@ void user_function_cmd_received( uint8_t *pusrdata )
     }
     else if ( p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint == 3 )  //idx
     {
-
-
         os_log("val:%d",user_config->idx);
         os_log("name:%s",sys_config->micoSystemConfig.name);
         os_log("seed:%d",sys_config->micoSystemConfig.seed);

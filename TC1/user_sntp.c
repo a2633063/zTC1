@@ -41,5 +41,10 @@ void sntp_init(void)
 {
     struct in_addr ipp;ipp.s_addr=0xd248912c;
     sntp_set_server_ip_address (0,ipp);
-    sntp_start_auto_time_sync (86400000,  sntp_time_call_back);        //每小时校准一次
+    sntp_start_auto_time_sync (15000,  sntp_time_call_back);        //每小时校准一次
+
+    mico_rtc_time_t rtc_time;
+    MicoRtcGetTime(&rtc_time);
+    os_log("time:20%d/%d/%d %d %d:%d:%d",rtc_time.year,rtc_time.month,rtc_time.date,rtc_time.weekday,rtc_time.hr,rtc_time.min,rtc_time.sec);
+
 }

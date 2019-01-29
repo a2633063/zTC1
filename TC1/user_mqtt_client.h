@@ -6,7 +6,7 @@
 
 
 
-extern void user_mqtt_init(void);
+extern OSStatus user_mqtt_init(void);
 extern OSStatus user_mqtt_send( char *arg );
 
 

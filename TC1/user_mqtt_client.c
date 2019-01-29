@@ -110,22 +110,21 @@ OSStatus user_recv_handler( void *arg );
  *               Variables Definitions
  ******************************************************/
 
-mico_queue_t   mqtt_msg_send_queue = NULL;
+mico_queue_t mqtt_msg_send_queue = NULL;
 
 Client c;  // mqtt client object
 Network n;  // socket network for mqtt client
 
-static mico_worker_thread_t  mqtt_client_worker_thread; /* Worker thread to manage send/recv events */
-static mico_timed_event_t   mqtt_client_send_event;
+static mico_worker_thread_t mqtt_client_worker_thread; /* Worker thread to manage send/recv events */
+static mico_timed_event_t mqtt_client_send_event;
 
 /******************************************************
  *               Function Definitions
  ******************************************************/
 
 /* Application entrance */
-OSStatus user_mqtt_init( void *arg )
+OSStatus user_mqtt_init( void )
 {
-    UNUSED_PARAMETER( arg );
     OSStatus err = kNoErr;
 
 #ifdef MQTT_CLIENT_SSL_ENABLE
@@ -135,16 +134,17 @@ OSStatus user_mqtt_init( void *arg )
 #endif
     uint32_t mqtt_lib_version = MQTTClientLibVersion( );
     app_log( "MQTT client version: [%ld.%ld.%ld]",
-             0xFF & (mqtt_lib_version >> 16), 0xFF & (mqtt_lib_version >> 8), 0xFF & mqtt_lib_version);
+        0xFF & (mqtt_lib_version >> 16), 0xFF & (mqtt_lib_version >> 8), 0xFF & mqtt_lib_version);
 
     /* create mqtt msg send queue */
     err = mico_rtos_init_queue( &mqtt_msg_send_queue, "mqtt_msg_send_queue", sizeof(p_mqtt_send_msg_t),
-                                MAX_MQTT_SEND_QUEUE_SIZE );
+    MAX_MQTT_SEND_QUEUE_SIZE );
     require_noerr_action( err, exit, app_log("ERROR: create mqtt msg send queue err=%d.", err) );
 
     /* start mqtt client */
     err = mico_rtos_create_thread( NULL, MICO_APPLICATION_PRIORITY, "mqtt_client",
-                                   (mico_thread_function_t)mqtt_client_thread, mqtt_thread_stack_size, 0 );
+                                   (mico_thread_function_t) mqtt_client_thread,
+                                   mqtt_thread_stack_size, 0 );
     require_noerr_string( err, exit, "ERROR: Unable to start the mqtt client thread." );
 
     /* Create a worker thread for user handling MQTT data event  */
@@ -154,12 +154,12 @@ OSStatus user_mqtt_init( void *arg )
 //    /* Trigger a period send event */
 //    mico_rtos_register_timed_event( &mqtt_client_send_event, &mqtt_client_worker_thread, user_send_handler, 2000, NULL );
     
-exit:
-    if ( kNoErr != err )  app_log("ERROR, app thread exit err: %d", err);
+    exit:
+    if ( kNoErr != err ) app_log("ERROR, app thread exit err: %d", err);
     return err;
 }
 
-static OSStatus mqtt_client_release( Client *c, Network *n)
+static OSStatus mqtt_client_release( Client *c, Network *n )
 {
     OSStatus err = kNoErr;
 
@@ -167,7 +167,8 @@ static OSStatus mqtt_client_release( Client *c, Network *n)
 
     n->disconnect( n );  // close connection
 
-    if ( MQTT_SUCCESS != MQTTClientDeinit( c ) ) {
+    if ( MQTT_SUCCESS != MQTTClientDeinit( c ) )
+    {
         app_log("MQTTClientDeinit failed!");
         err = kDeletedErr;
     }
@@ -183,7 +184,7 @@ static OSStatus mqtt_msg_publish( Client *c, const char* topic, char qos, char r
     int ret = 0;
     MQTTMessage publishData = MQTTMessage_publishData_initializer;
 
-    require( topic && msg_len && msg, exit);
+    require( topic && msg_len && msg, exit );
 
     // upload data qos0
     publishData.qos = (enum QoS) qos;
@@ -193,15 +194,18 @@ static OSStatus mqtt_msg_publish( Client *c, const char* topic, char qos, char r
 
     ret = MQTTPublish( c, topic, &publishData );
 
-    if ( MQTT_SUCCESS == ret ) {
+    if ( MQTT_SUCCESS == ret )
+    {
         err = kNoErr;
-    } else if ( MQTT_SOCKET_ERR == ret ) {
+    } else if ( MQTT_SOCKET_ERR == ret )
+    {
         err = kConnectionErr;
-    } else {
+    } else
+    {
         err = kUnknownErr;
     }
 
-exit:
+    exit:
     return err;
 }
 
@@ -229,7 +233,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     msg_send_event_fd = mico_create_event_fd( mqtt_msg_send_queue );
     require_action( msg_send_event_fd >= 0, exit, mqtt_log("ERROR: create msg send queue event fd failed!!!") );
 
-MQTT_start:
+    MQTT_start:
     /* 1. create network connection */
 #ifdef MQTT_CLIENT_SSL_ENABLE
     ssl_settings.ssl_enable = true;
@@ -241,17 +245,19 @@ MQTT_start:
     ssl_settings.ssl_enable = false;
 #endif
     LinkStatusTypeDef LinkStatus;
-    while( 1 ){
+    while ( 1 )
+    {
 
-        micoWlanGetLinkStatus(&LinkStatus);
-        if(LinkStatus.is_connected!=1){
+        micoWlanGetLinkStatus( &LinkStatus );
+        if ( LinkStatus.is_connected != 1 )
+        {
             mqtt_log("ERROR:WIFI not connection , waiting 3s for connecting and then connecting MQTT ", rc);
             mico_rtos_thread_sleep( 3 );
             continue;
         }
 
         rc = NewNetwork( &n, MQTT_SERVER, MQTT_SERVER_PORT, ssl_settings );
-        if( rc == MQTT_SUCCESS ) break;
+        if ( rc == MQTT_SUCCESS ) break;
         mqtt_log("ERROR: MQTT network connection err=%d, reconnect after 3s...", rc);
         mico_rtos_thread_sleep( 3 );
     }
@@ -261,7 +267,7 @@ MQTT_start:
     /* 2. init mqtt client */
     //c.heartbeat_retry_max = 2;
     rc = MQTTClientInit( &c, &n, MQTT_CMD_TIMEOUT );
-    require_noerr_string(rc, MQTT_reconnect, "ERROR: MQTT client init err.");
+    require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client init err." );
 
     mqtt_log("MQTT client init success!");
 
@@ -275,18 +281,17 @@ MQTT_start:
     connectData.cleansession = 1;
 
     rc = MQTTConnect( &c, &connectData );
-    require_noerr_string(rc, MQTT_reconnect, "ERROR: MQTT client connect err.");
+    require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client connect err." );
 
     mqtt_log("MQTT client connect success!");
 
     /* 4. mqtt client subscribe */
     rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC1, QOS0, messageArrived );
-    require_noerr_string(rc, MQTT_reconnect, "ERROR: MQTT client subscribe err.");
+    require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
     mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC1);
 
-
     rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC2, QOS0, messageArrived );
-    require_noerr_string(rc, MQTT_reconnect, "ERROR: MQTT client subscribe err.");
+    require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
     mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC2);
 
     /* 5. client loop for recv msg && keepalive */
@@ -313,7 +318,7 @@ MQTT_start:
             {
                 // get msg from send queue
                 mico_rtos_pop_from_queue( &mqtt_msg_send_queue, &p_send_msg, 0 );
-                require_string( p_send_msg, exit, "Wrong data point");
+                require_string( p_send_msg, exit, "Wrong data point" );
 
                 // send message to server
                 err = mqtt_msg_publish( &c, p_send_msg->topic, p_send_msg->qos, p_send_msg->retained,
@@ -337,15 +342,15 @@ MQTT_start:
         }
     }
 
-MQTT_reconnect:
+    MQTT_reconnect:
     mqtt_log("Disconnect MQTT client, and reconnect after 5s, reason: mqtt_rc = %d, err = %d", rc, err );
     mqtt_client_release( &c, &n );
     mico_rtos_thread_sleep( 5 );
     goto MQTT_start;
 
-exit:
+    exit:
     mqtt_log("EXIT: MQTT client exit with err = %d.", err);
-    mqtt_client_release( &c, &n);
+    mqtt_client_release( &c, &n );
     mico_rtos_delete_thread( NULL );
 }
 
@@ -357,10 +362,9 @@ static void messageArrived( MessageData* md )
     MQTTMessage* message = md->message;
     /*
      app_log("MQTT messageArrived callback: topiclen=[%d][%s],\t payloadlen=[%d][%s]",md->topicName->lenstring.len,
-                                     md->topicName->lenstring.data,(int)message->payloadlen,(char*)message->payload);
+     md->topicName->lenstring.data,(int)message->payloadlen,(char*)message->payload);
      */
 //    mqtt_log("======MQTT received callback ![%d]======", MicoGetMemoryInfo()->free_memory );
-
     p_recv_msg = (p_mqtt_recv_msg_t) calloc( 1, sizeof(mqtt_recv_msg_t) );
     require_action( p_recv_msg, exit, err = kNoMemoryErr );
 
@@ -373,14 +377,14 @@ static void messageArrived( MessageData* md )
     err = mico_rtos_send_asynchronous_event( &mqtt_client_worker_thread, user_recv_handler, p_recv_msg );
     require_noerr( err, exit );
 
-exit:
-    if ( err != kNoErr ) {
+    exit:
+    if ( err != kNoErr )
+    {
         app_log("ERROR: Recv data err = %d", err);
-        if( p_recv_msg ) free( p_recv_msg );
+        if ( p_recv_msg ) free( p_recv_msg );
     }
     return;
 }
-
 
 /* Application process MQTT received data */
 OSStatus user_recv_handler( void *arg )
@@ -390,10 +394,10 @@ OSStatus user_recv_handler( void *arg )
     require( p_recv_msg, exit );
 
     app_log("user get data success! from_topic=[%s], msg=[%ld][%s].\r\n", p_recv_msg->topic, p_recv_msg->datalen, p_recv_msg->data);
-    user_function_cmd_received(p_recv_msg->data);
+    user_function_cmd_received( p_recv_msg->data );
     free( p_recv_msg );
 
-exit:
+    exit:
     return err;
 }
 
@@ -406,7 +410,8 @@ OSStatus user_mqtt_send( char *arg )
 //    app_log("======App prepare to send ![%d]======", MicoGetMemoryInfo()->free_memory);
 
     /* Send queue is full, pop the oldest */
-    if ( mico_rtos_is_queue_full( &mqtt_msg_send_queue ) == true ){
+    if ( mico_rtos_is_queue_full( &mqtt_msg_send_queue ) == true )
+    {
         mico_rtos_pop_from_queue( &mqtt_msg_send_queue, &p_send_msg, 0 );
         free( p_send_msg );
         p_send_msg = NULL;
@@ -427,8 +432,8 @@ OSStatus user_mqtt_send( char *arg )
 
     //app_log("Push user msg into send queue success!");
 
-exit:
-    if( err != kNoErr && p_send_msg ) free( p_send_msg );
+    exit:
+    if ( err != kNoErr && p_send_msg ) free( p_send_msg );
     return err;
 
 }
