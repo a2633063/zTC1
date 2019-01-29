@@ -240,8 +240,16 @@ MQTT_start:
 #else
     ssl_settings.ssl_enable = false;
 #endif
-
+    LinkStatusTypeDef LinkStatus;
     while( 1 ){
+
+        micoWlanGetLinkStatus(&LinkStatus);
+        if(LinkStatus.is_connected!=1){
+            mqtt_log("ERROR:WIFI not connection , waiting 3s for connecting and then connecting MQTT ", rc);
+            mico_rtos_thread_sleep( 3 );
+            continue;
+        }
+
         rc = NewNetwork( &n, MQTT_SERVER, MQTT_SERVER_PORT, ssl_settings );
         if( rc == MQTT_SUCCESS ) break;
         mqtt_log("ERROR: MQTT network connection err=%d, reconnect after 3s...", rc);

@@ -11,9 +11,34 @@ user_config_t * user_config;
 
 mico_gpio_t Relay[Relay_NUM] = { Relay_0, Relay_1, Relay_2, Relay_3, Relay_4, Relay_5 };
 
+/* MICO system callback: Restore default configuration provided by application */
+void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
+{
+    int i, j;
+    UNUSED_PARAMETER( size );
+
+    sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME );
+    user_config_t* userConfigDefault = user_config_data;
+    userConfigDefault->idx = -1;
+
+    for(i=0;i<PLUG_NUM;i++)
+    {
+        userConfigDefault->plug[i].idx=-1;
+        sprintf( userConfigDefault->plug[i].name, "²å×ù%d",i );
+        for(j=0;j<PLUG_TIME_TASK_NUM;j++)
+        {
+            userConfigDefault->plug[i].task[j].hour=0;
+            userConfigDefault->plug[i].task[j].minute=0;
+            userConfigDefault->plug[i].task[j].repeat=0x80;
+            userConfigDefault->plug[i].task[j].on=0;
+        }
+    }
+
+}
+
 int application_start( void )
 {
-
+    int i, j;
     os_log( "Start" );
 
     OSStatus err = kNoErr;
@@ -22,12 +47,25 @@ int application_start( void )
     sys_config = mico_system_context_init( sizeof(user_config_t) );
     user_config = ((system_context_t *) sys_config)->user_config_data;
     require_action( user_config, exit, err = kNoMemoryErr );
-    os_log( "user config:%d",user_config->val );
+
     err = mico_system_init( sys_config );
     require_noerr( err, exit );
 
+    os_log( "idx:%d",user_config->idx );
+    for ( i = 0; i < PLUG_NUM; i++ )
+    {
+        os_log("plug_%d:",i);
+        os_log("\tname:%s:",user_config->plug[i].name);
+        os_log("\tidx:%d:",user_config->plug[i].idx);
+        for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
+        {
+            os_log("\t\ton:%d\t %02d:%02d repeat:0x%X",user_config->plug[i].task[j].on,
+                user_config->plug[i].task[j].hour,user_config->plug[i].task[j].minute,
+                user_config->plug[i].task[j].repeat);
+        }
+    }
 
-    for ( int i = 0; i < Relay_NUM; i++ )
+    for ( i = 0; i < Relay_NUM; i++ )
     {
         MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
         //MicoGpioOutputHigh(Relay[i]);
@@ -43,10 +81,17 @@ int application_start( void )
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
     led( 0 );
 
+    if ( user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
+    {
+        os_log( "WARNGIN: user params restored!" );
+        err = mico_system_context_restore( sys_config );
+        require_noerr( err, exit );
+    }
+
     wifi_init( );
     key_init( );
-    user_mqtt_init();
-//    wifi_start_easylink();
+    user_mqtt_init( );
+
     while ( 1 )
     {
 //        mico_thread_msleep(500);
