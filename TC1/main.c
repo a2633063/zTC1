@@ -51,20 +51,6 @@ int application_start( void )
     err = mico_system_init( sys_config );
     require_noerr( err, exit );
 
-    os_log( "idx:%d",user_config->idx );
-    for ( i = 0; i < PLUG_NUM; i++ )
-    {
-        os_log("plug_%d:",i);
-        os_log("\tname:%s:",user_config->plug[i].name);
-        os_log("\tidx:%d:",user_config->plug[i].idx);
-        for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
-        {
-            os_log("\t\ton:%d\t %02d:%02d repeat:0x%X",user_config->plug[i].task[j].on,
-                user_config->plug[i].task[j].hour,user_config->plug[i].task[j].minute,
-                user_config->plug[i].task[j].repeat);
-        }
-    }
-
     for ( i = 0; i < Relay_NUM; i++ )
     {
         MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
@@ -87,6 +73,21 @@ int application_start( void )
         err = mico_system_context_restore( sys_config );
         require_noerr( err, exit );
     }
+    os_log( "idx:%d",user_config->idx );
+    for ( i = 0; i < PLUG_NUM; i++ )
+    {
+        os_log("plug_%d:",i);
+        os_log("\tname:%s:",user_config->plug[i].name);
+        os_log("\tidx:%d:",user_config->plug[i].idx);
+        for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
+        {
+            os_log("\t\ton:%d\t %02d:%02d repeat:0x%X",user_config->plug[i].task[j].on,
+                user_config->plug[i].task[j].hour,user_config->plug[i].task[j].minute,
+                user_config->plug[i].task[j].repeat);
+        }
+    }
+
+
 
     wifi_init( );
     key_init( );
