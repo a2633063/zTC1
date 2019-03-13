@@ -34,7 +34,7 @@ void wifi_start_easylink( )
     micoWlanStartEasyLink( 20000 );
     user_led_set( 1 );
 }
-uint32_t ip=0xd248912c;
+uint32_t ip = 0xd248912c;
 //easylink 完成回调
 void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg )
 {
@@ -67,9 +67,8 @@ void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg
 //wifi已连接获取到IP地址 回调
 static void wifi_get_ip_callback( IPStatusTypedef *pnet, void * arg )
 {
-    os_log("got IP:%s,  MAC:%s", pnet->ip,pnet->mac);
+    os_log("got IP:%s", pnet->ip);
     wifi_status = WIFI_STATE_CONNECTED;
-    strcpy(strMac, pnet->mac);
 }
 //wifi连接状态改变回调
 static void wifi_status_callback( WiFiEvent status, void *arg )
@@ -101,10 +100,10 @@ static void wifi_led_timer_callback( void* arg )
 
         case WIFI_STATE_CONNECTING:
             //if ( num > 1 )
-            {
-                num = 0;
-                user_led_set( -1 );
-            }
+        {
+            num = 0;
+            user_led_set( -1 );
+        }
             break;
         case WIFI_STATE_NOEASYLINK:
             wifi_start_easylink( );
@@ -143,6 +142,10 @@ void wifi_init( void )
     //sntp_init();
     //启动定时器开始进行wifi连接
     if ( !mico_rtos_is_timer_running( &wifi_led_timer ) ) mico_rtos_start_timer( &wifi_led_timer );
+
+    IPStatusTypedef para;
+    micoWlanGetIPStatus( &para, Station );
+    strcpy( strMac, para.mac );
 
 }
 

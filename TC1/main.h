@@ -9,7 +9,7 @@
 
 #define ZTC1_NAME "zTC1_%02X%02X"
 
-#define USER_CONFIG_VERSION 1
+#define USER_CONFIG_VERSION 2
 #define SETTING_MQTT_STRING_LENGTH_MAX  32      //±ØÐë 4 ×Ö½Ú¶ÔÆë¡£
 
 #define PLUG_NAME_LENGTH 32
@@ -64,7 +64,7 @@ typedef struct
 
 extern char rtc_init;
 
-extern char strMac[12];
+extern char strMac[16];
 extern system_config_t * sys_config;
 extern user_config_t * user_config;
 
