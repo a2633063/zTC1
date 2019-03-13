@@ -342,6 +342,10 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     MQTT_reconnect:
     mqtt_log("Disconnect MQTT client, and reconnect after 5s, reason: mqtt_rc = %d, err = %d", rc, err );
     mqtt_client_release( &c, &n );
+
+    user_led_set( -1 );
+    mico_rtos_thread_msleep(100);
+    user_led_set( -1 );
     mico_rtos_thread_sleep( 5 );
     goto MQTT_start;
 
