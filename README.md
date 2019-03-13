@@ -20,7 +20,7 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 ### 烧录
 
-需要拆开TC1: 底部防滑垫下两颗螺旋,敲击底部拆下电路板,将CLK/DIO接口与jlink或其他支持烧录的烧录器,使用以上编译即可直接烧录
+需要拆开TC1: 底部防滑垫下两颗螺旋,敲击底部拆下电路板,将CLK/DIO接口与jlink或其他支持烧录的烧录器连接,使用以上编译即可直接烧录
 
 
 
@@ -55,10 +55,10 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 - [x] MQTT客户端连接服务器,订阅/发布主题
 
-- [x] Json 数据处理
+- [ ] Json 数据处理
 
-- [ ] MQTT设置各项配置
+- [x] MQTT设置各项配置
 
-- [ ] 单独提供一个UDP/TCP端口供配置
+- [x] 单独提供一个UDP/TCP端口供配置
 
   
