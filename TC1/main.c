@@ -3,11 +3,15 @@
 #include "user_gpio.h"
 #include "user_wifi.h"
 #include "user_rtc.h"
+#include "user_udp.h"
 #include "user_mqtt_client.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 
-char rtc_init=0;
+char rtc_init=0;    //sntp校时成功标志位
+
+char strMac[12] = { 0 };
+
 system_config_t * sys_config;
 user_config_t * user_config;
 
@@ -101,6 +105,9 @@ int application_start( void )
     require_noerr( err, exit );
     err = user_rtc_init();
     require_noerr( err, exit );
+
+
+    err = user_udp_init();
     while ( 1 )
     {
 //        mico_thread_msleep(500);

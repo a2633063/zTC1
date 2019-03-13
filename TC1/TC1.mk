@@ -28,6 +28,7 @@ $(NAME)_SOURCES := main.c\
 				   cJSON/cJSON.c\
 				   user_wifi.c\
 				   user_gpio.c\
+				   user_udp.c\
 				   user_sntp.c\
 				   user_rtc.c\
 				   user_mqtt_client.c\

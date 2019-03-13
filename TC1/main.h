@@ -56,6 +56,8 @@ typedef struct {
 
 
 extern char rtc_init;
+
+extern char strMac[12];
 extern system_config_t * sys_config;
 extern user_config_t * user_config;
 

@@ -92,7 +92,7 @@ OSStatus user_rtc_init( void )
 //                                MAX_MQTT_SEND_QUEUE_SIZE );
 //    require_noerr_action( err, exit, app_log("ERROR: create mqtt msg send queue err=%d.", err) );
 
-    /* start mqtt client */
+    /* start rtc client */
     err = mico_rtos_create_thread( NULL, MICO_APPLICATION_PRIORITY, "rtc",
                                    (mico_thread_function_t) rtc_thread,
                                    0x1000, 0 );
@@ -145,7 +145,9 @@ void rtc_thread( mico_thread_arg_t arg )
         rtc_time.year = (currentTime->tm_year + 1900) % 100;
 
 //        MicoRtcSetTime( &rtc_time );      //MicoRtc不自动走时!
-        os_log("time:20%02d/%02d/%02d %d %02d:%02d:%02d",rtc_time.year,rtc_time.month,rtc_time.date,rtc_time.weekday,rtc_time.hr,rtc_time.min,rtc_time.sec);
+
+        if ( rtc_time.sec == 0 )
+            os_log("time:20%02d/%02d/%02d %d %02d:%02d:%02d",rtc_time.year,rtc_time.month,rtc_time.date,rtc_time.weekday,rtc_time.hr,rtc_time.min,rtc_time.sec);
 
         char update_user_config_flag = 0;
         for ( i = 0; i < PLUG_NUM; i++ )

@@ -67,9 +67,9 @@ void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg
 //wifi已连接获取到IP地址 回调
 static void wifi_get_ip_callback( IPStatusTypedef *pnet, void * arg )
 {
-    os_log("got IP:%s", pnet->ip);
+    os_log("got IP:%s,  MAC:%s", pnet->ip,pnet->mac);
     wifi_status = WIFI_STATE_CONNECTED;
-
+    strcpy(strMac, pnet->mac);
 }
 //wifi连接状态改变回调
 static void wifi_status_callback( WiFiEvent status, void *arg )

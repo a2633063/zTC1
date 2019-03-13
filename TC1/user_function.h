@@ -6,7 +6,7 @@
 #include "mico.h"
 #include "MiCOKit_EXT.h"
 
-void user_function_cmd_received(uint8_t *pusrdata);
+void user_function_cmd_received(struct sockaddr *addr,uint8_t *pusrdata);
 
 
 
