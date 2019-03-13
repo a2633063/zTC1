@@ -8,7 +8,7 @@
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 
-char rtc_init=0;    //sntp校时成功标志位
+char rtc_init = 0;    //sntp校时成功标志位
 
 char strMac[12] = { 0 };
 
@@ -23,21 +23,39 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     int i, j;
     UNUSED_PARAMETER( size );
 
-    sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME );
-    user_config_t* userConfigDefault = user_config_data;
-    userConfigDefault->idx = -1;
-    userConfigDefault->version=USER_CONFIG_VERSION;
-    for(i=0;i<PLUG_NUM;i++)
+    if ( strMac[0] == 0 )
     {
-        userConfigDefault->plug[i].idx=-1;
-        sprintf( userConfigDefault->plug[i].name, "插座%d",i );
-        for(j=0;j<PLUG_TIME_TASK_NUM;j++)
+        IPStatusTypedef para;
+        micoWlanGetIPStatus( &para, Station );
+        strcpy( strMac, para.mac);
+    }
+
+    unsigned char mac1,mac2;
+    mac1=strtohex(strMac[8],strMac[9]);
+    mac2=strtohex(strMac[10],strMac[11]);
+
+
+    sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME,mac1,mac2 );
+    user_config_t* userConfigDefault = user_config_data;
+
+    userConfigDefault->mqtt_ip[0] = 0;
+    userConfigDefault->mqtt_port = 0;
+    userConfigDefault->mqtt_user[0] = 0;
+    userConfigDefault->mqtt_password[0] = 0;
+
+    userConfigDefault->idx = -1;
+    userConfigDefault->version = USER_CONFIG_VERSION;
+    for ( i = 0; i < PLUG_NUM; i++ )
+    {
+        userConfigDefault->plug[i].idx = -1;
+        sprintf( userConfigDefault->plug[i].name, "插座%d", i );
+        for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
         {
-            userConfigDefault->plug[i].task[j].hour=0;
-            userConfigDefault->plug[i].task[j].minute=0;
-            userConfigDefault->plug[i].task[j].repeat=0x80;
-            userConfigDefault->plug[i].task[j].on=0;
-            userConfigDefault->plug[i].task[j].action=1;
+            userConfigDefault->plug[i].task[j].hour = 0;
+            userConfigDefault->plug[i].task[j].minute = 0;
+            userConfigDefault->plug[i].task[j].repeat = 0x80;
+            userConfigDefault->plug[i].task[j].on = 0;
+            userConfigDefault->plug[i].task[j].action = 1;
         }
     }
 
@@ -76,7 +94,7 @@ int application_start( void )
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
     user_led_set( 0 );
 
-    if (user_config->version!=USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
+    if ( user_config->version != USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
         os_log( "WARNGIN: user params restored!" );
         err = mico_system_context_restore( sys_config );
@@ -97,17 +115,14 @@ int application_start( void )
         }
     }
 
-
-
     wifi_init( );
     key_init( );
     err = user_mqtt_init( );
     require_noerr( err, exit );
-    err = user_rtc_init();
+    err = user_rtc_init( );
     require_noerr( err, exit );
 
-
-    err = user_udp_init();
+    err = user_udp_init( );
     while ( 1 )
     {
 //        mico_thread_msleep(500);

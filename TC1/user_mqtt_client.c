@@ -33,13 +33,12 @@
  *                    Constants
  ******************************************************/
 
-#define MQTT_CLIENT_ID         "MQTT_Client_zTC1"
-#define MQTT_CLIENT_USERNAME    "z"
-#define MQTT_CLIENT_PASSWORD    "2633063"
+#define MQTT_CLIENT_ID         sys_config->micoSystemConfig.name
+#define MQTT_CLIENT_USERNAME    user_config->mqtt_user
+#define MQTT_CLIENT_PASSWORD    user_config->mqtt_password
 #define MQTT_CLIENT_KEEPALIVE   30
-#define MQTT_CLIENT_SUB_TOPIC1   "test/mico/test0"  // loop msg
-#define MQTT_CLIENT_SUB_TOPIC2   "domoticz/out"  // loop msg
-#define MQTT_CLIENT_PUB_TOPIC   "test/mico/test1"
+#define MQTT_CLIENT_SUB_TOPIC1   "domoticz/out"  // loop msg
+#define MQTT_CLIENT_PUB_TOPIC   "domoticz/in"
 #define MQTT_CMD_TIMEOUT        5000  // 5s
 #define MQTT_YIELD_TMIE         5000  // 5s
 //#define MQTT_CLIENT_SSL_ENABLE  // ssl
@@ -74,8 +73,8 @@ REyPOFdGdhBY2P1FNRy0MDr6xr+D2ZOwxs63dG1nnAnWZg7qwoLgpZ4fESPD3PkA\r\n\
 
 #else  // ! MQTT_CLIENT_SSL_ENABLE
 
-#define MQTT_SERVER             "47.112.16.98"
-#define MQTT_SERVER_PORT        1883
+#define MQTT_SERVER             user_config->mqtt_ip
+#define MQTT_SERVER_PORT        user_config->mqtt_port
 
 #endif // MQTT_CLIENT_SSL_ENABLE
 
@@ -247,6 +246,8 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     LinkStatusTypeDef LinkStatus;
     while ( 1 )
     {
+        mico_rtos_thread_sleep( 3 );
+        if(MQTT_SERVER[0]<0x20 ||MQTT_SERVER[0]>0x7f ||MQTT_SERVER_PORT<1) continue;  //未配置mqtt服务器时不连接
 
         micoWlanGetLinkStatus( &LinkStatus );
         if ( LinkStatus.is_connected != 1 )
@@ -259,7 +260,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
         rc = NewNetwork( &n, MQTT_SERVER, MQTT_SERVER_PORT, ssl_settings );
         if ( rc == MQTT_SUCCESS ) break;
         mqtt_log("ERROR: MQTT network connection err=%d, reconnect after 3s...", rc);
-        mico_rtos_thread_sleep( 3 );
+
     }
 
     mqtt_log("MQTT network connection success!");
@@ -289,10 +290,6 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC1, QOS0, messageArrived );
     require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
     mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC1);
-
-    rc = MQTTSubscribe( &c, MQTT_CLIENT_SUB_TOPIC2, QOS0, messageArrived );
-    require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
-    mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC2);
 
     /* 5. client loop for recv msg && keepalive */
     while ( 1 )
@@ -394,7 +391,7 @@ OSStatus user_recv_handler( void *arg )
     require( p_recv_msg, exit );
 
     app_log("user get data success! from_topic=[%s], msg=[%ld][%s].\r\n", p_recv_msg->topic, p_recv_msg->datalen, p_recv_msg->data);
-    user_function_cmd_received(NULL, p_recv_msg->data );
+    user_function_cmd_received(0, p_recv_msg->data );
     free( p_recv_msg );
 
     exit:

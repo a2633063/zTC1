@@ -1,6 +1,7 @@
 #define os_log(format, ...)  custom_log("UDP", format, ##__VA_ARGS__)
 
 #include "main.h"
+#include "user_function.h"
 
 #define LOCAL_UDP_PORT 10182
 #define REMOTE_UDP_PORT 10181
@@ -42,7 +43,7 @@ void udp_thread( void *arg )
     OSStatus err;
     struct sockaddr_in addr;
     fd_set readfds;
-    struct timeval t = { 0, 5000 * 1000 };  //5s
+
     socklen_t addrLen = sizeof(addr);
     int udp_fd = -1, len;
     p_udp_send_msg_t p_send_msg = NULL;
@@ -87,8 +88,10 @@ void udp_thread( void *arg )
             require_action( len >= 0, exit, err = kConnectionErr );
 
             strcpy( ip_address, inet_ntoa( addr.sin_addr ) );
+            if(len<1024) buf[len]=0;
             os_log( "udp recv from %s:%d, len:%d :%s", ip_address,addr.sin_port, len ,buf);
-            sendto( udp_fd, buf, len, 0, (struct sockaddr *) &addr, sizeof(struct sockaddr_in) );
+            user_function_cmd_received(1,buf);
+//            sendto( udp_fd, buf, len, 0, (struct sockaddr *) &addr, sizeof(struct sockaddr_in) );
         }
 
         /* recv msg from user worker thread to be sent to server */
