@@ -4,6 +4,13 @@
 #include "user_gpio.h"
 #include "cJSON/cJSON.h"
 
+uint32_t last_time = 0;
+
+void user_function_set_last_time( )
+{
+    last_time = UpTicks( );
+}
+
 typedef struct _user_json_context_t
 {
     int8_t idx;
@@ -16,7 +23,7 @@ bool json_plug_task_analysis( char x, char y, cJSON * pJsonRoot, cJSON * pJsonSe
 
 void user_send( int udp_flag, char *s )
 {
-    if ( udp_flag )
+    if ( udp_flag || !user_mqtt_isconnect( ) )
         user_udp_send( s ); //发送数据
     else
         user_mqtt_send( s );
@@ -47,8 +54,7 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         cJSON_AddNumberToObject( pRoot, "type", TYPE );
         cJSON_AddStringToObject( pRoot, "type_name", TYPE_NAME );
         char *s = cJSON_Print( pRoot );
-        os_log( "pRoot: %s\r\n", s );
-
+//        os_log( "pRoot: %s\r\n", s );
         user_send( udp_flag, s ); //发送数据
         free( (void *) s );
         cJSON_Delete( pRoot );
@@ -99,21 +105,26 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         cJSON_AddStringToObject( json_send, "mac", strMac );
 
         cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
-        if ( p_nvalue && cJSON_IsNumber( p_nvalue ) )
+        if ( p_nvalue )
         {
-//            uint32 now_time = system_get_time( );
-//            os_log( "system_get_time:%d,%d = %09d\r\n", last_time, now_time, now_time - last_time );
-//            if ( now_time - last_time < 1500000 && p_idx && p_nvalue->valueint == user_rudder_get_direction( ) )
-//            {
-//                return_flag = false;
-//            } else
-//            {
-            if ( p_nvalue->valueint != user_config->plug[i].on )
+            if ( cJSON_IsNumber( p_nvalue ) )
             {
-                user_relay_set_all( p_nvalue->valueint );
+                uint32_t now_time = UpTicks( );
+                os_log( "system_get_time:%d,%d = %09d\r\n", last_time, now_time, (now_time - last_time) );
+                if ( now_time - last_time < 1000 && p_idx  )
+                {
+                    return_flag = false;
+                } else
+                {
+                    if ( p_nvalue->valueint != user_config->plug[i].on )
+                    {
+                        user_relay_set_all( p_nvalue->valueint );
+                        update_user_config_flag = true;
+                    }
+                }
+                user_function_set_last_time( );
             }
-//            }
-//            user_json_set_last_time( );
+            cJSON_AddNumberToObject( json_send, "nvalue", relay_out( ) );
         }
 
         //解析主机setting-----------------------------------------------------------------
@@ -202,10 +213,10 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         if ( user_config->idx >= 0 )
         cJSON_AddNumberToObject( json_send, "idx", user_config->idx );
 
-        //if ( return_flag == true )
+        if ( return_flag == true )
         {
             char *json_str = cJSON_Print( json_send );
-            os_log( "pRoot: %s\r\n", json_str );
+//            os_log( "pRoot: %s\r\n", json_str );
             user_send( udp_flag, json_str ); //发送数据
             free( (void *) json_str );
         }
@@ -253,7 +264,7 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
         if ( cJSON_IsNumber( p_plug_on ) )
         {
             user_relay_set( x, p_plug_on->valueint );
-
+            return_flag = true;
             if ( user_config->plug[x].idx > 0 )
             {
                 cJSON *json_return_now = cJSON_CreateObject( );
@@ -319,7 +330,7 @@ bool json_plug_task_analysis( char x, char y, cJSON * pJsonRoot, cJSON * pJsonSe
 {
     if ( !pJsonRoot ) return false;
     bool return_flag = false;
-    char i;
+
     char plug_task_str[] = "task_X";
     plug_task_str[5] = y + '0';
 

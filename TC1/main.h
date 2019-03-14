@@ -9,7 +9,7 @@
 
 #define ZTC1_NAME "zTC1_%02X%02X"
 
-#define USER_CONFIG_VERSION 1
+#define USER_CONFIG_VERSION 2
 #define SETTING_MQTT_STRING_LENGTH_MAX  32      //±ØÐë 4 ×Ö½Ú¶ÔÆë¡£
 
 #define PLUG_NAME_LENGTH 32

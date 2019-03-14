@@ -108,7 +108,7 @@ OSStatus user_recv_handler( void *arg );
 /******************************************************
  *               Variables Definitions
  ******************************************************/
-
+bool isconnect=false;
 mico_queue_t mqtt_msg_send_queue = NULL;
 
 Client c;  // mqtt client object
@@ -233,6 +233,8 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     require_action( msg_send_event_fd >= 0, exit, mqtt_log("ERROR: create msg send queue event fd failed!!!") );
 
     MQTT_start:
+
+    isconnect=false;
     /* 1. create network connection */
 #ifdef MQTT_CLIENT_SSL_ENABLE
     ssl_settings.ssl_enable = true;
@@ -246,6 +248,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     LinkStatusTypeDef LinkStatus;
     while ( 1 )
     {
+        isconnect=false;
         mico_rtos_thread_sleep( 3 );
         if(MQTT_SERVER[0]<0x20 ||MQTT_SERVER[0]>0x7f ||MQTT_SERVER_PORT<1) continue;  //未配置mqtt服务器时不连接
 
@@ -294,6 +297,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     /* 5. client loop for recv msg && keepalive */
     while ( 1 )
     {
+        isconnect=true;
         no_mqtt_msg_exchange = true;
         FD_ZERO( &readfds );
         FD_SET( c.ipstack->my_socket, &readfds );
@@ -342,7 +346,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     MQTT_reconnect:
     mqtt_log("Disconnect MQTT client, and reconnect after 5s, reason: mqtt_rc = %d, err = %d", rc, err );
     mqtt_client_release( &c, &n );
-
+    isconnect=false;
     user_led_set( -1 );
     mico_rtos_thread_msleep(100);
     user_led_set( -1 );
@@ -350,6 +354,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     goto MQTT_start;
 
     exit:
+    isconnect=false;
     mqtt_log("EXIT: MQTT client exit with err = %d.", err);
     mqtt_client_release( &c, &n );
     mico_rtos_delete_thread( NULL );
@@ -437,4 +442,9 @@ OSStatus user_mqtt_send( char *arg )
     if ( err != kNoErr && p_send_msg ) free( p_send_msg );
     return err;
 
+}
+
+bool user_mqtt_isconnect()
+{
+    return isconnect;
 }

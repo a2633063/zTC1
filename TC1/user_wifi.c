@@ -87,6 +87,7 @@ static void wifi_led_timer_callback( void* arg )
 {
     static unsigned int num = 0;
     num++;
+
     switch ( wifi_status )
     {
         case WIFI_STATE_FAIL:

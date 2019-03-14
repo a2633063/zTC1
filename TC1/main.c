@@ -48,6 +48,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     for ( i = 0; i < PLUG_NUM; i++ )
     {
         userConfigDefault->plug[i].idx = -1;
+        userConfigDefault->plug[i].on = 1;
         sprintf( userConfigDefault->plug[i].name, "²å×ù%d", i );
         for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
         {
@@ -65,7 +66,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
 
 int application_start( void )
 {
-    int i, j;
+    int i;
     os_log( "Start" );
 
     OSStatus err = kNoErr;

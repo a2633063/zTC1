@@ -8,6 +8,6 @@
 
 extern OSStatus user_mqtt_init(void);
 extern OSStatus user_mqtt_send( char *arg );
-
+extern bool user_mqtt_isconnect(void);
 
 #endif
