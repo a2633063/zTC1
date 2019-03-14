@@ -212,11 +212,11 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         cJSON_Delete( json_send );
     }
 
-//    if ( update_user_config_flag )
-//    {
-//        mico_system_context_update( sys_config );
-//        update_user_config_flag = false;
-//    }
+    if ( update_user_config_flag )
+    {
+        mico_system_context_update( sys_config );
+        update_user_config_flag = false;
+    }
 
     cJSON_Delete( pJsonRoot );
     return;
@@ -303,6 +303,8 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
             if ( json_plug_task_analysis( x, i, p_plug_setting, json_plug_setting_send ) )
                 return_flag = true;
         }
+
+        cJSON_AddItemToObject( json_plug_send, "setting", json_plug_setting_send );
     }
 
     cJSON_AddItemToObject( pJsonSend, plug_str, json_plug_send );

@@ -70,6 +70,11 @@ int application_start( void )
 
     OSStatus err = kNoErr;
 
+    for ( i = 0; i < Relay_NUM; i++ )
+    {
+        MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
+        //MicoGpioOutputHigh(Relay[i]);
+    }
     /* Create mico system context and read application's config data from flash */
     sys_config = mico_system_context_init( sizeof(user_config_t) );
     user_config = ((system_context_t *) sys_config)->user_config_data;
@@ -79,11 +84,6 @@ int application_start( void )
     require_noerr( err, exit );
 
 
-    for ( i = 0; i < Relay_NUM; i++ )
-    {
-        MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
-        //MicoGpioOutputHigh(Relay[i]);
-    }
 
     MicoGpioInitialize( (mico_gpio_t) Button, INPUT_PULL_UP );
     if ( !MicoGpioInputGet( Button ) )
