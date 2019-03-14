@@ -9,6 +9,6 @@
 extern void user_led_set(char x);
 extern void key_init(void);
 extern void user_relay_set( char x, char y );
-
+extern void user_relay_set_all( char y );
 
 #endif

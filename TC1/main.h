@@ -37,13 +37,13 @@ typedef struct
     uint8_t repeat; //bit7:一次   bit6-0:周日-周一
     char action;    //动作
     char on;    //开关
-
 } user_plug_task_config_t;
 
 typedef struct
 {
     char name[PLUG_NAME_LENGTH];
     char idx;
+    char on;    //记录当前开关
     user_plug_task_config_t task[PLUG_TIME_TASK_NUM];
 
 } user_plug_config_t;

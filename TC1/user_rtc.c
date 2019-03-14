@@ -174,13 +174,16 @@ void rtc_thread( mico_thread_arg_t arg )
                 }
             }
         }
+
+        //更新储存数据 更新定时任务数据
         if ( update_user_config_flag == 1 )
         {
-            mico_system_context_update( sys_config );   //更新定时任务数据
+            mico_system_context_update( sys_config );
             update_user_config_flag = 0;
         }
 
-        if ( rtc_init != 1 || (rtc_time.sec == 0 && rtc_time.min == 0) ) //开机及每小时校准一次
+        //SNTP服务 开机及每小时校准一次
+        if ( rtc_init != 1 || (rtc_time.sec == 0 && rtc_time.min == 0) )
         {
             micoWlanGetLinkStatus( &LinkStatus );
             if ( LinkStatus.is_connected == 1 )
