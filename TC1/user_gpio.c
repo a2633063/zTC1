@@ -3,6 +3,7 @@
 #include "main.h"
 #include "user_gpio.h"
 #include "user_mqtt_client.h"
+#include "user_udp.h"
 #include "cJSON/cJSON.h"
 
 mico_gpio_t relay[Relay_NUM] = { Relay_0, Relay_1, Relay_2, Relay_3, Relay_4, Relay_5 };
@@ -70,29 +71,35 @@ static void key_long_press( void )
 static void key_short_press( void )
 {
     char i;
-
-    cJSON *json_send = cJSON_CreateObject( );
-
-    cJSON_AddStringToObject( json_send, "mac", strMac );
-    if ( user_config->idx >= 0 ) cJSON_AddNumberToObject( json_send, "idx", user_config->idx );
+    OSStatus err;
 
     if ( relay_out( ) )
     {
         user_relay_set_all( 0 );
-        cJSON_AddNumberToObject( json_send, "nvalue", 1 );
     }
     else
     {
         user_relay_set_all( 1 );
-        cJSON_AddNumberToObject( json_send, "nvalue", 0 );
     }
 
-    char *json_str = cJSON_Print( json_send );
-    if ( !user_mqtt_isconnect() )//发送数据
-        user_udp_send( json_str );
-    else
-        user_mqtt_send( json_str );
-    free( (void *) json_str );
+    uint8_t *buf = NULL;
+    if ( user_config->idx >= 0 )
+    {
+
+        buf = malloc( 1024 );
+        require_action( buf, exit, err = kNoMemoryErr );
+
+        sprintf( buf, "{\"idx\" : %d,\"mac\" : \"%s\",\"nvalue\" : %d}", user_config->idx,strMac, relay_out() );
+        if ( !user_mqtt_isconnect( ) ) //发送数据
+            user_udp_send( buf );
+        else
+            user_mqtt_send( buf );
+    }
+    exit:
+    if ( err != kNoErr )
+        os_log("key_short_press Send data with err: %d", err);
+    if ( buf != NULL ) free( buf );
+
 }
 
 void key_init( void )
