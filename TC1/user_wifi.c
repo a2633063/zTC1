@@ -46,12 +46,7 @@ void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg
         return;
     }
 
-    os_log("ssid:%s",nwkpara->wifi_ssid);
-    os_log("key:%s",nwkpara->wifi_key);
-    os_log("local_ip_addr:%s",nwkpara->local_ip_addr);
-    os_log("net_mask:%s",nwkpara->net_mask);
-    os_log("gateway_ip_addr:%s",nwkpara->gateway_ip_addr);
-    os_log("dnsServer_ip_addr:%s",nwkpara->dnsServer_ip_addr);
+    os_log("ssid:\"%s\",\"%s\"",nwkpara->wifi_ssid,nwkpara->wifi_key);
 
     //±£´æwifi¼°ÃÜÂë
     strcpy( sys_config->micoSystemConfig.ssid, nwkpara->wifi_ssid );

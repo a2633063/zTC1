@@ -63,10 +63,26 @@ void user_relay_set_all( char y )
 
 static void key_long_press( void )
 {
-    os_log("key_long_press");
-    user_led_set( 1 );
-    user_mqtt_send( "mqtt test" );
+//    os_log("key_long_press");
+//    user_led_set( 1 );
+//    user_mqtt_send( "mqtt test" );
+}
 
+static void key_long_10s_press( void )
+{
+    OSStatus err;
+    char i = 0;
+    os_log( "WARNGIN: user params restored!" );
+//    for ( i = 0; i < 3; i++ )
+//    {
+//        user_led_set( 1 );
+//        mico_rtos_thread_msleep( 100 );
+//        user_led_set( 0 );
+//    }
+//
+    appRestoreDefault_callback( user_config, sizeof(user_config_t) );
+    sys_config->micoSystemConfig.ssid[0] = 0;
+    mico_system_context_update( mico_system_context_get( ) );
 }
 static void key_short_press( void )
 {
@@ -82,35 +98,95 @@ static void key_short_press( void )
         user_relay_set_all( 1 );
     }
 
-    uint8_t *buf = NULL;
     if ( user_config->idx >= 0 )
     {
+        uint8_t * buf = NULL; //[64] = { 0 };
+        buf = malloc( 64 );
+        if ( buf != NULL )
+        {
 
-        buf = malloc( 1024 );
-        require_action( buf, exit, err = kNoMemoryErr );
-
-        sprintf( buf, "{\"idx\" : %d,\"mac\" : \"%s\",\"nvalue\" : %d}", user_config->idx,strMac, relay_out() );
-        if ( !user_mqtt_isconnect( ) ) //发送数据
-            user_udp_send( buf );
-        else
-            user_mqtt_send( buf );
+            sprintf( buf, "{\"idx\" : %d,\"mac\" : \"%s\",\"nvalue\" : %d}", user_config->idx, strMac, relay_out( ) );
+            os_log("send %s", buf);
+            if ( !user_mqtt_isconnect( ) ) //发送数据
+                user_udp_send( buf );
+            else
+                user_mqtt_send( buf );
+            free( buf );
+        }
     }
-    exit:
-    if ( err != kNoErr )
-        os_log("key_short_press Send data with err: %d", err);
-    if ( buf != NULL ) free( buf );
 
 }
+mico_timer_t user_key_timer;
+uint16_t key_time = 0;
+#define BUTTON_LONG_PRESS_TIME    10     //100ms*10=1s
 
+static void key_timeout_handler( void* arg )
+{
+
+    static uint8_t key_trigger, key_continue;
+    static uint8_t key_last;
+    //按键扫描程序
+    uint8_t tmp = ~(0xfe | MicoGpioInputGet( Button ));
+    key_trigger = tmp & (tmp ^ key_continue);
+    key_continue = tmp;
+//    os_log("button scan:%02x %02x",key_trigger,key_continue);
+    if ( key_trigger != 0 ) key_time = 0; //新按键按下时,重新开始按键计时
+    if ( key_continue != 0 )
+    {
+        //any button pressed
+        key_time++;
+        if ( key_time < BUTTON_LONG_PRESS_TIME )
+            key_last = key_continue;
+        else
+        {
+            os_log("button long pressed:%d",key_time);
+
+            if ( key_time == 30 )
+            {
+                key_long_press( );
+            }
+            else if ( key_time == 100 )
+            {
+                key_long_10s_press( );
+            }
+            else if ( key_time == 102 )
+            {
+                user_led_set( 1 );
+            }
+            else if ( key_time == 103 )
+            {
+                user_led_set( 0 );
+                key_time=101;
+            }
+        }
+
+    } else
+    {
+        //button released
+        if ( key_time < BUTTON_LONG_PRESS_TIME )
+        {   //100ms*10=1s 大于1s为长按
+            key_time = 0;
+            os_log("button short pressed:%d",key_time);
+            key_short_press( );
+        } else if(key_time > 100)
+        {
+            MicoSystemReboot( );
+        }
+        key_last = 0;
+        mico_rtos_stop_timer( &user_key_timer );
+    }
+}
+
+static void key_falling_irq_handler( void* arg )
+{
+    mico_rtos_start_timer( &user_key_timer );
+}
 void key_init( void )
 {
-    button_init_t button_config = {
-        .gpio = Button,
-        .long_pressed_func = key_long_press,
-        .pressed_func = key_short_press,
-        .long_pressed_timeout = 800,
-    };
+    MicoGpioInitialize( Button, INPUT_PULL_UP );
+    mico_rtos_init_timer( &user_key_timer, 100, key_timeout_handler, NULL );
 
-    button_init( IOBUTTON_USER_1, button_config );
+    MicoGpioEnableIRQ( Button, IRQ_TRIGGER_FALLING_EDGE, key_falling_irq_handler, NULL );
+
 }
 
