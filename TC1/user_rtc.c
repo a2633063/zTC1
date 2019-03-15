@@ -161,11 +161,11 @@ void rtc_thread( mico_thread_arg_t arg )
                     if (    //符合条件则改变继电器状态: 秒为0 时分符合设定值, 重复符合设定值
                     rtc_time.sec == 0 && rtc_time.min == user_config->plug[i].task[j].minute
                     && rtc_time.hr == user_config->plug[i].task[j].hour
-                    && ((repeat == 0x80) || repeat & (1 << (rtc_time.weekday - 1)))
+                    && ((repeat == 0x00) || repeat & (1 << (rtc_time.weekday - 1)))
                     )
                     {
                         user_relay_set( i, user_config->plug[i].task[j].action );
-                        if ( repeat == 0x80 )
+                        if ( repeat == 0x00 )
                         {
                             user_config->plug[i].task[j].on = 0;
                             update_user_config_flag = 1;

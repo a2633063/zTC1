@@ -89,7 +89,7 @@ void udp_thread( void *arg )
 
             strcpy( ip_address, inet_ntoa( addr.sin_addr ) );
             if(len<1024) buf[len]=0;
-            os_log( "udp recv from %s:%d, len:%d :%s", ip_address,addr.sin_port, len ,buf);
+            os_log( "udp recv from %s:%d, len:%d ", ip_address,addr.sin_port, len );
             user_function_cmd_received(1,buf);
 //            sendto( udp_fd, buf, len, 0, (struct sockaddr *) &addr, sizeof(struct sockaddr_in) );
         }
@@ -107,7 +107,7 @@ void udp_thread( void *arg )
                 err = udp_msg_send( udp_fd, p_send_msg->data, p_send_msg->datalen );
 //                require_noerr_string( err, MQTT_reconnect, "ERROR: udp publish data err" );
 
-                os_log( "udp send data success! msg=[%ld][%s].\r\n", p_send_msg->datalen, p_send_msg->data );
+                os_log( "udp send data success! msg=[%ld].\r\n", p_send_msg->datalen);
                 free( p_send_msg );
                 p_send_msg = NULL;
             }

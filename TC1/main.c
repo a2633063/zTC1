@@ -54,7 +54,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
         {
             userConfigDefault->plug[i].task[j].hour = 0;
             userConfigDefault->plug[i].task[j].minute = 0;
-            userConfigDefault->plug[i].task[j].repeat = 0x80;
+            userConfigDefault->plug[i].task[j].repeat = 0x00;
             userConfigDefault->plug[i].task[j].on = 0;
             userConfigDefault->plug[i].task[j].action = 1;
         }

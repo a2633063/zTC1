@@ -83,6 +83,16 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
                     cJSON *json_send = cJSON_CreateObject( );
                     cJSON_AddNumberToObject( json_send, "idx", user_config->plug[i].idx );
                     cJSON_AddNumberToObject( json_send, "nvalue", user_config->plug[i].on );
+                    cJSON_AddStringToObject( json_send, "mac", strMac );
+
+                    char strTemp1[] = "plug_X";
+                    strTemp1[5] = i + '0';
+                    cJSON *json_send_plug_on = cJSON_CreateObject( );
+                    cJSON_AddNumberToObject( json_send_plug_on, "on", p_nvalue->valueint );
+
+                    cJSON_AddItemToObject( json_send, strTemp1, json_send_plug_on );
+
+
                     char *json_str = cJSON_Print( json_send );
                     user_send( udp_flag, json_str ); //·¢ËÍÊý¾Ý
                     free( json_str );
@@ -111,7 +121,7 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
             {
                 uint32_t now_time = UpTicks( );
                 os_log( "system_get_time:%d,%d = %09d\r\n", last_time, now_time, (now_time - last_time) );
-                if ( now_time - last_time < 1000 && p_idx  )
+                if ( now_time - last_time < 1000 && p_idx )
                 {
                     return_flag = false;
                 } else

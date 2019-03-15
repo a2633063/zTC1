@@ -98,21 +98,20 @@ static void key_short_press( void )
         user_relay_set_all( 1 );
     }
 
-    if ( user_config->idx >= 0 )
+    uint8_t * buf = NULL; //[64] = { 0 };
+    buf = malloc( 64 );
+    if ( buf != NULL )
     {
-        uint8_t * buf = NULL; //[64] = { 0 };
-        buf = malloc( 64 );
-        if ( buf != NULL )
-        {
-
+        if ( user_config->idx >= 0 )
             sprintf( buf, "{\"idx\" : %d,\"mac\" : \"%s\",\"nvalue\" : %d}", user_config->idx, strMac, relay_out( ) );
-            os_log("send %s", buf);
-            if ( !user_mqtt_isconnect( ) ) //发送数据
-                user_udp_send( buf );
-            else
-                user_mqtt_send( buf );
-            free( buf );
-        }
+        else
+            sprintf( buf, "{\"mac\" : \"%s\",\"nvalue\" : %d}", strMac, relay_out( ) );
+        os_log("send %s", buf);
+        if ( !user_mqtt_isconnect( ) ) //发送数据
+            user_udp_send( buf );
+        else
+            user_mqtt_send( buf );
+        free( buf );
     }
 
 }
@@ -156,7 +155,7 @@ static void key_timeout_handler( void* arg )
             else if ( key_time == 103 )
             {
                 user_led_set( 0 );
-                key_time=101;
+                key_time = 101;
             }
         }
 
@@ -168,7 +167,7 @@ static void key_timeout_handler( void* arg )
             key_time = 0;
             os_log("button short pressed:%d",key_time);
             key_short_press( );
-        } else if(key_time > 100)
+        } else if ( key_time > 100 )
         {
             MicoSystemReboot( );
         }
