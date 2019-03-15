@@ -89,7 +89,7 @@ static void key_short_press( void )
     char i;
     OSStatus err;
 
-    if ( relay_out( ) )
+    if ( relay_out() )
     {
         user_relay_set_all( 0 );
     }
@@ -98,21 +98,30 @@ static void key_short_press( void )
         user_relay_set_all( 1 );
     }
 
-    uint8_t * buf = NULL; //[64] = { 0 };
-    buf = malloc( 64 );
-    if ( buf != NULL )
+    char relay_out_temp;
+    cJSON *json_send = cJSON_CreateObject( );
+    cJSON_AddStringToObject( json_send, "mac", strMac );
+    if ( user_config->idx >= 0 )
+    cJSON_AddNumberToObject( json_send, "idx", user_config->idx );
+
+    relay_out_temp = relay_out( ) ? 1 : 0;
+    char plug_str[] = "plug_X";
+    for ( i = 0; i < PLUG_NUM; i++ )
     {
-        if ( user_config->idx >= 0 )
-            sprintf( buf, "{\"idx\" : %d,\"mac\" : \"%s\",\"nvalue\" : %d}", user_config->idx, strMac, relay_out( ) );
-        else
-            sprintf( buf, "{\"mac\" : \"%s\",\"nvalue\" : %d}", strMac, relay_out( ) );
-        os_log("send %s", buf);
-        if ( !user_mqtt_isconnect( ) ) //发送数据
-            user_udp_send( buf );
-        else
-            user_mqtt_send( buf );
-        free( buf );
+        plug_str[5] = i + '0';
+        cJSON *json_plug_send = cJSON_CreateObject( );
+        cJSON_AddNumberToObject( json_plug_send, "on", relay_out_temp );
+        cJSON_AddItemToObject( json_send, plug_str, json_plug_send );
     }
+
+    char *json_str = cJSON_Print( json_send );
+    if ( !user_mqtt_isconnect( ) ) //发送数据
+        user_udp_send( json_str );
+    else
+        user_mqtt_send( json_str );
+
+    free( (void *) json_str );
+    cJSON_Delete( json_send );
 
 }
 mico_timer_t user_key_timer;

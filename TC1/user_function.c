@@ -92,7 +92,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
 
                     cJSON_AddItemToObject( json_send, strTemp1, json_send_plug_on );
 
-
                     char *json_str = cJSON_Print( json_send );
                     user_send( udp_flag, json_str ); //发送数据
                     free( json_str );
@@ -134,7 +133,7 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
                 }
                 user_function_set_last_time( );
             }
-            cJSON_AddNumberToObject( json_send, "nvalue", relay_out( ) );
+            cJSON_AddNumberToObject( json_send, "nvalue", p_nvalue->valueint );
         }
 
         //解析主机setting-----------------------------------------------------------------
@@ -263,31 +262,34 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
     plug_str[5] = x + '0';
 
     cJSON *p_plug = cJSON_GetObjectItem( pJsonRoot, plug_str );
-    if ( !p_plug ) return false;
+    if ( !p_plug ) return_flag = false;
 
     cJSON *json_plug_send = cJSON_CreateObject( );
 
     //解析plug on------------------------------------------------------
-    cJSON *p_plug_on = cJSON_GetObjectItem( p_plug, "on" );
-    if ( p_plug_on )
+    if ( p_plug )
     {
-        if ( cJSON_IsNumber( p_plug_on ) )
+        cJSON *p_plug_on = cJSON_GetObjectItem( p_plug, "on" );
+        if ( p_plug_on )
         {
-            user_relay_set( x, p_plug_on->valueint );
-            return_flag = true;
-            if ( user_config->plug[x].idx > 0 )
+            if ( cJSON_IsNumber( p_plug_on ) )
             {
-                cJSON *json_return_now = cJSON_CreateObject( );
-                cJSON_AddNumberToObject( json_return_now, "idx", user_config->plug[x].idx );
-                cJSON_AddNumberToObject( json_return_now, "nvalue", user_config->plug[x].on );
-                char *json_str = cJSON_Print( json_return_now );
-                user_send( udp_flag, json_str ); //发送数据
-                free( json_str );
-                cJSON_Delete( json_return_now );
+                user_relay_set( x, p_plug_on->valueint );
+                return_flag = true;
+                if ( user_config->plug[x].idx > 0 )
+                {
+                    cJSON *json_return_now = cJSON_CreateObject( );
+                    cJSON_AddNumberToObject( json_return_now, "idx", user_config->plug[x].idx );
+                    cJSON_AddNumberToObject( json_return_now, "nvalue", user_config->plug[x].on );
+                    char *json_str = cJSON_Print( json_return_now );
+                    user_send( udp_flag, json_str ); //发送数据
+                    free( json_str );
+                    cJSON_Delete( json_return_now );
+                }
             }
+
+
         }
-        cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
-    }
 
     //解析plug中setting项目----------------------------------------------
     cJSON *p_plug_setting = cJSON_GetObjectItem( p_plug, "setting" );
@@ -327,6 +329,9 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
 
         cJSON_AddItemToObject( json_plug_send, "setting", json_plug_setting_send );
     }
+}
+        cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
+        if ( p_plug || p_nvalue )cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
 
     cJSON_AddItemToObject( pJsonSend, plug_str, json_plug_send );
     return return_flag;
