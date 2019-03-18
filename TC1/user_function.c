@@ -288,50 +288,50 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
                 }
             }
 
-
         }
 
-    //解析plug中setting项目----------------------------------------------
-    cJSON *p_plug_setting = cJSON_GetObjectItem( p_plug, "setting" );
-    if ( p_plug_setting )
-    {
-        cJSON *json_plug_setting_send = cJSON_CreateObject( );
-        //解析plug中setting中name----------------------------------------
-        cJSON *p_plug_setting_name = cJSON_GetObjectItem( p_plug_setting, "name" );
-        if ( p_plug_setting_name )
+        //解析plug中setting项目----------------------------------------------
+        cJSON *p_plug_setting = cJSON_GetObjectItem( p_plug, "setting" );
+        if ( p_plug_setting )
         {
-            if ( cJSON_IsString( p_plug_setting_name ) )
+            cJSON *json_plug_setting_send = cJSON_CreateObject( );
+            //解析plug中setting中name----------------------------------------
+            cJSON *p_plug_setting_name = cJSON_GetObjectItem( p_plug_setting, "name" );
+            if ( p_plug_setting_name )
             {
-                return_flag = true;
-                sprintf( user_config->plug[x].name, p_plug_setting_name->valuestring );
+                if ( cJSON_IsString( p_plug_setting_name ) )
+                {
+                    return_flag = true;
+                    sprintf( user_config->plug[x].name, p_plug_setting_name->valuestring );
+                }
+                cJSON_AddStringToObject( json_plug_setting_send, "name", user_config->plug[x].name );
             }
-            cJSON_AddStringToObject( json_plug_setting_send, "name", user_config->plug[x].name );
-        }
 
-        //解析plug中setting中idx----------------------------------------
-        cJSON *p_plug_setting_idx = cJSON_GetObjectItem( p_plug_setting, "idx" );
-        if ( p_plug_setting_idx )
-        {
-            if ( cJSON_IsNumber( p_plug_setting_idx ) )
+            //解析plug中setting中idx----------------------------------------
+            cJSON *p_plug_setting_idx = cJSON_GetObjectItem( p_plug_setting, "idx" );
+            if ( p_plug_setting_idx )
             {
-                return_flag = true;
-                user_config->plug[x].idx = p_plug_setting_idx->valueint;
+                if ( cJSON_IsNumber( p_plug_setting_idx ) )
+                {
+                    return_flag = true;
+                    user_config->plug[x].idx = p_plug_setting_idx->valueint;
+                }
+                cJSON_AddNumberToObject( json_plug_setting_send, "idx", user_config->plug[x].idx );
             }
-            cJSON_AddNumberToObject( json_plug_setting_send, "idx", user_config->plug[x].idx );
-        }
 
-        //解析plug中setting中task----------------------------------------
-        for ( i = 0; i < PLUG_TIME_TASK_NUM; i++ )
-        {
-            if ( json_plug_task_analysis( x, i, p_plug_setting, json_plug_setting_send ) )
-                return_flag = true;
-        }
+            //解析plug中setting中task----------------------------------------
+            for ( i = 0; i < PLUG_TIME_TASK_NUM; i++ )
+            {
+                if ( json_plug_task_analysis( x, i, p_plug_setting, json_plug_setting_send ) )
+                    return_flag = true;
+            }
 
-        cJSON_AddItemToObject( json_plug_send, "setting", json_plug_setting_send );
+            cJSON_AddItemToObject( json_plug_send, "setting", json_plug_setting_send );
+        }
     }
-}
-        cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
-        if ( p_plug || p_nvalue )cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
+    cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
+//    if ( p_plug || p_nvalue )
+        cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
 
     cJSON_AddItemToObject( pJsonSend, plug_str, json_plug_send );
     return return_flag;

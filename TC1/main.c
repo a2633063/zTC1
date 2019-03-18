@@ -49,7 +49,19 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     {
         userConfigDefault->plug[i].idx = -1;
         userConfigDefault->plug[i].on = 1;
-        sprintf( userConfigDefault->plug[i].name, "²å×ù%d", i );
+
+        //²å×ùÃû³Æ ²å¿Ú1-6
+        userConfigDefault->plug[i].name[0]=0xe6;
+        userConfigDefault->plug[i].name[1]=0x8f;
+        userConfigDefault->plug[i].name[2]=0x92;
+        userConfigDefault->plug[i].name[3]=0xe5;
+        userConfigDefault->plug[i].name[4]=0x8f;
+        userConfigDefault->plug[i].name[5]=0xa3;
+        userConfigDefault->plug[i].name[6]=i+'1';
+        userConfigDefault->plug[i].name[7]=0;
+
+
+//        sprintf( userConfigDefault->plug[i].name, "²å×ù%d", i );//±àÂëÒì³£
         for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
         {
             userConfigDefault->plug[i].task[j].hour = 0;
