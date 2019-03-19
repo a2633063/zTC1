@@ -22,6 +22,7 @@
 #include "mico.h"
 #include "MQTTClient.h"
 #include "user_function.h"
+#include "cJSON/cJSON.h"
 /******************************************************
  *                      Macros
  ******************************************************/
@@ -45,7 +46,7 @@
 
 #define MAX_MQTT_TOPIC_SIZE         (256)
 #define MAX_MQTT_DATA_SIZE          (1024)
-#define MAX_MQTT_SEND_QUEUE_SIZE    (5)
+#define MAX_MQTT_SEND_QUEUE_SIZE    (10)
 
 #ifdef MQTT_CLIENT_SSL_ENABLE
 
@@ -108,7 +109,7 @@ OSStatus user_recv_handler( void *arg );
 /******************************************************
  *               Variables Definitions
  ******************************************************/
-bool isconnect=false;
+bool isconnect = false;
 mico_queue_t mqtt_msg_send_queue = NULL;
 
 Client c;  // mqtt client object
@@ -212,7 +213,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
 {
     OSStatus err = kUnknownErr;
 
-    int rc = -1;
+    int i,rc = -1;
     fd_set readfds;
     struct timeval t = { 0, MQTT_YIELD_TMIE * 1000 };
 
@@ -234,7 +235,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
 
     MQTT_start:
 
-    isconnect=false;
+    isconnect = false;
     /* 1. create network connection */
 #ifdef MQTT_CLIENT_SSL_ENABLE
     ssl_settings.ssl_enable = true;
@@ -248,9 +249,9 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     LinkStatusTypeDef LinkStatus;
     while ( 1 )
     {
-        isconnect=false;
+        isconnect = false;
         mico_rtos_thread_sleep( 3 );
-        if(MQTT_SERVER[0]<0x20 ||MQTT_SERVER[0]>0x7f ||MQTT_SERVER_PORT<1) continue;  //未配置mqtt服务器时不连接
+        if ( MQTT_SERVER[0] < 0x20 || MQTT_SERVER[0] > 0x7f || MQTT_SERVER_PORT < 1 ) continue;  //未配置mqtt服务器时不连接
 
         micoWlanGetLinkStatus( &LinkStatus );
         if ( LinkStatus.is_connected != 1 )
@@ -294,10 +295,33 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
     mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC1);
 
+    /*4.1 连接成功后先更新发送一次数据*/
+    isconnect = true;
+    uint8_t *buf1 = NULL;
+    buf1 = malloc( 1024 ); //idx为1位时长度为24
+    if ( buf1 != NULL )
+    {
+        sprintf(
+            buf1,
+            "{\"mac\":\"%s\",\"plug_0\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_1\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_2\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_3\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_4\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_5\":{\"on\":null,\"setting\":{\"name\":null}}}",
+            strMac );
+        user_function_cmd_received( 0, buf1 );
+
+        for ( i = 0; i < PLUG_NUM; i++ )
+        {
+            if ( user_config->plug[i].idx >= 0 )
+            {
+                sprintf( buf1, "{\"idx\":%d,\"nvalue\":%d}", user_config->plug[i].idx, user_config->plug[i].on );
+                user_mqtt_send( buf1 );
+            }
+        }
+        free( buf1 );
+    }
+
     /* 5. client loop for recv msg && keepalive */
     while ( 1 )
     {
-        isconnect=true;
+        isconnect = true;
         no_mqtt_msg_exchange = true;
         FD_ZERO( &readfds );
         FD_SET( c.ipstack->my_socket, &readfds );
@@ -346,15 +370,15 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     MQTT_reconnect:
     mqtt_log("Disconnect MQTT client, and reconnect after 5s, reason: mqtt_rc = %d, err = %d", rc, err );
     mqtt_client_release( &c, &n );
-    isconnect=false;
+    isconnect = false;
     user_led_set( -1 );
-    mico_rtos_thread_msleep(100);
+    mico_rtos_thread_msleep( 100 );
     user_led_set( -1 );
     mico_rtos_thread_sleep( 5 );
     goto MQTT_start;
 
     exit:
-    isconnect=false;
+    isconnect = false;
     mqtt_log("EXIT: MQTT client exit with err = %d.", err);
     mqtt_client_release( &c, &n );
     mico_rtos_delete_thread( NULL );
@@ -399,8 +423,8 @@ OSStatus user_recv_handler( void *arg )
     p_mqtt_recv_msg_t p_recv_msg = arg;
     require( p_recv_msg, exit );
 
-    app_log("user get data success! from_topic=[%s], msg=[%ld][%s].\r\n", p_recv_msg->topic, p_recv_msg->datalen, p_recv_msg->data);
-    user_function_cmd_received(0, p_recv_msg->data );
+    app_log("user get data success! from_topic=[%s], msg=[%ld].\r\n", p_recv_msg->topic, p_recv_msg->datalen);
+    user_function_cmd_received( 0, p_recv_msg->data );
     free( p_recv_msg );
 
     exit:
@@ -444,7 +468,7 @@ OSStatus user_mqtt_send( char *arg )
 
 }
 
-bool user_mqtt_isconnect()
+bool user_mqtt_isconnect( )
 {
     return isconnect;
 }
