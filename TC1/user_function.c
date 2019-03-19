@@ -47,7 +47,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
     cJSON *p_cmd = cJSON_GetObjectItem( pJsonRoot, "cmd" );
     if ( p_cmd && cJSON_IsString( p_cmd ) && strcmp( p_cmd->valuestring, "device report" ) == 0 )
     {
-
         cJSON *pRoot = cJSON_CreateObject( );
         cJSON_AddStringToObject( pRoot, "name", sys_config->micoSystemConfig.name );
         cJSON_AddStringToObject( pRoot, "mac", strMac );

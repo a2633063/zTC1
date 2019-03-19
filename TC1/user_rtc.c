@@ -4,6 +4,7 @@
 #include "user_gpio.h"
 #include "sntp.h"
 #include "user_sntp.h"
+#include "cJSON/cJSON.h"
 
 void rtc_thread( mico_thread_arg_t arg );
 
@@ -107,6 +108,7 @@ OSStatus user_rtc_init( void )
 void rtc_thread( mico_thread_arg_t arg )
 {
     int i, j;
+    char task_flag[PLUG_NUM] = { -1, -1, -1, -1, -1, -1 };   //记录每个插座哪个任务需要返回数据
     OSStatus err = kUnknownErr;
     LinkStatusTypeDef LinkStatus;
     mico_rtc_time_t rtc_time;
@@ -131,7 +133,6 @@ void rtc_thread( mico_thread_arg_t arg )
 
     while ( 1 )
     {
-
         mico_time_get_utc_time( &utc_time );
         utc_time += 28800;
         struct tm * currentTime = localtime( (const time_t *) &utc_time );
@@ -164,9 +165,30 @@ void rtc_thread( mico_thread_arg_t arg )
                     && ((repeat == 0x00) || repeat & (1 << (rtc_time.weekday - 1)))
                     )
                     {
-                        user_relay_set( i, user_config->plug[i].task[j].action );
+                        if ( user_config->plug[i].on = user_config->plug[i].task[j].action )
+                        {
+                            user_relay_set( i, user_config->plug[i].task[j].action );
+                            update_user_config_flag = 1;
+
+                            //更新domoticz状态
+                            if ( user_config->plug[i].idx >= 0 )
+                            {
+                                uint8_t *buf = NULL;
+                                buf = malloc( 32 ); //idx为1位时长度为24
+                                if ( buf != NULL )
+                                {
+                                    sprintf( buf, "{\"idx\":%d,\"nvalue\":%d}", user_config->plug[i].idx, user_config->plug[i].on );
+                                    if ( !user_mqtt_isconnect( ) )
+                                        user_udp_send( buf ); //发送数据
+                                    else
+                                        user_mqtt_send( buf );
+                                    free( buf );
+                                }
+                            }
+                        }
                         if ( repeat == 0x00 )
                         {
+                            task_flag[i] = j;
                             user_config->plug[i].task[j].on = 0;
                             update_user_config_flag = 1;
                         }
@@ -178,8 +200,51 @@ void rtc_thread( mico_thread_arg_t arg )
         //更新储存数据 更新定时任务数据
         if ( update_user_config_flag == 1 )
         {
+            os_log("update_user_config_flag");
             mico_system_context_update( sys_config );
             update_user_config_flag = 0;
+
+            cJSON *json_send = cJSON_CreateObject( );
+            cJSON_AddStringToObject( json_send, "mac", strMac );
+
+            for ( i = 0; i < PLUG_NUM; i++ )
+            {
+                char strTemp1[] = "plug_X";
+                strTemp1[5] = i + '0';
+                cJSON *json_send_plug = cJSON_CreateObject( );
+                cJSON_AddNumberToObject( json_send_plug, "on", user_config->plug[i].on );
+
+                if ( task_flag[i] >= 0 )
+                {
+                    cJSON *json_send_plug_setting = cJSON_CreateObject( );
+
+                    j = task_flag[i];
+                    char strTemp2[] = "task_X";
+                    strTemp2[5] = j + '0';
+                    cJSON *json_send_plug_task = cJSON_CreateObject( );
+                    cJSON_AddNumberToObject( json_send_plug_task, "hour", user_config->plug[i].task[j].hour );
+                    cJSON_AddNumberToObject( json_send_plug_task, "minute", user_config->plug[i].task[j].minute );
+                    cJSON_AddNumberToObject( json_send_plug_task, "repeat", user_config->plug[i].task[j].repeat );
+                    cJSON_AddNumberToObject( json_send_plug_task, "action", user_config->plug[i].task[j].action );
+                    cJSON_AddNumberToObject( json_send_plug_task, "on", user_config->plug[i].task[j].on );
+                    cJSON_AddItemToObject( json_send_plug_setting, strTemp2, json_send_plug_task );
+
+                    cJSON_AddItemToObject( json_send_plug, "setting", json_send_plug_setting );
+
+                    task_flag[i]=-1;
+                }
+                cJSON_AddItemToObject( json_send, strTemp1, json_send_plug );
+            }
+
+            char *json_str = cJSON_Print( json_send );
+            if ( !user_mqtt_isconnect( ) )
+                user_udp_send( json_str ); //发送数据
+            else
+                user_mqtt_send( json_str );
+
+            free( json_str );
+            cJSON_Delete( json_send );
+            os_log("cJSON_Delete");
         }
 
         //SNTP服务 开机及每小时校准一次

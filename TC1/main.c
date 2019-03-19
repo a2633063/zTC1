@@ -106,8 +106,11 @@ int application_start( void )
     }
 
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
-    user_led_set( 0 );
-
+    for ( i = 0; i < Relay_NUM; i++ )
+    {
+        user_relay_set(i,user_config->plug[i].on);
+    }
+    MicoSysLed(0);
     if ( user_config->version != USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
         os_log( "WARNGIN: user params restored!" );
