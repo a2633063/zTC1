@@ -110,6 +110,10 @@ static void wifi_led_timer_callback( void* arg )
         case WIFI_STATE_CONNECTED:
             user_led_set( 0 );
             mico_rtos_stop_timer( &wifi_led_timer );
+            if ( relay_out( ) )
+                user_led_set( 1 );
+            else
+                user_led_set( 0 );
             break;
     }
 }
