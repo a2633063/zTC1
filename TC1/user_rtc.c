@@ -5,6 +5,8 @@
 #include "sntp.h"
 #include "user_sntp.h"
 #include "cJSON/cJSON.h"
+#include "user_mqtt_client.h"
+#include "user_function.h"
 
 void rtc_thread( mico_thread_arg_t arg );
 
@@ -69,7 +71,7 @@ OSStatus user_sntp_get_time( )
         os_log("sntp_get_time4 err = %d.", err);
         return err;
     }
-
+    return kNoErr;
 }
 
 OSStatus user_rtc_init( void )
@@ -165,7 +167,7 @@ void rtc_thread( mico_thread_arg_t arg )
                     && ((repeat == 0x00) || repeat & (1 << (rtc_time.weekday - 1)))
                     )
                     {
-                        if ( user_config->plug[i].on = user_config->plug[i].task[j].action )
+                        if ( user_config->plug[i].on != user_config->plug[i].task[j].action )
                         {
                             user_relay_set( i, user_config->plug[i].task[j].action );
                             update_user_config_flag = 1;
@@ -244,7 +246,7 @@ void rtc_thread( mico_thread_arg_t arg )
 
             free( json_str );
             cJSON_Delete( json_send );
-            os_log("cJSON_Delete");
+//            os_log("cJSON_Delete");
         }
 
         //SNTP服务 开机及每小时校准一次
@@ -264,7 +266,7 @@ void rtc_thread( mico_thread_arg_t arg )
         mico_rtos_thread_msleep( 900 );
     }
 
-    exit:
+//    exit:
     os_log("EXIT: rtc exit with err = %d.", err);
     mico_rtos_delete_thread( NULL );
 }

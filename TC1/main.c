@@ -79,7 +79,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
 int application_start( void )
 {
     int i;
-    os_log( "Start" );
+    os_log( "Start v0.1" );
 
     OSStatus err = kNoErr;
 
