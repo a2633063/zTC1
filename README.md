@@ -1,9 +1,17 @@
 # zTC1
 **斐讯TC1智能排插个人固件.**
 
-斐讯0元购完全翻车了,服务器也已经关闭.其中的智能排插TC1,也以为服务器关闭,app无法登陆,定时开关等功能完全无法使用,为此,针对TC1智能排插的硬件,开发供自己使用的FW,确保自己能够正常使用此排插.
+斐讯0元购完全翻车了,服务器也已经关闭.其中的智能排插TC1,也因为服务器关闭,app无法登陆,定时开关等功能完全无法使用,为此,针对TC1智能排插的硬件,开发供自己使用的FW及对应app,确保自己能够正常使用此排插.
 
 
+
+APP: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_Android_MQTT)
+
+
+
+
+
+## 
 
 ## 编译烧录
 
@@ -20,7 +28,7 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 ### 烧录
 
-需要拆开TC1: 底部防滑垫下两颗螺旋,敲击底部拆下电路板,将CLK/DIO接口与jlink或其他支持烧录的烧录器连接,使用以上编译即可直接烧录
+[zTC1-固件烧录](https://github.com/a2633063/zTC1/wiki/zTC1-固件烧录)
 
 
 
