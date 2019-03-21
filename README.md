@@ -36,6 +36,10 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 
 
+### 使用
+
+[开始使用](https://github.com/a2633063/zTC1/wiki/开始使用)
+
 ## 功能
 
 暂时计划完成以下功能,后续有需要继续添加
