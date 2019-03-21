@@ -13,7 +13,7 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 
 **本文档只做简单介绍,如果你要使用,可以从[点这里](https://github.com/a2633063/zTC1/wiki)开始**
 
-
+本项目还处于开发前期,可能会有bug,文档不全等缺点!敬请注意
 
 
 ## 编译烧录
