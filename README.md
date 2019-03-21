@@ -1,21 +1,25 @@
 # zTC1
 **斐讯TC1智能排插个人固件.**
 
-斐讯0元购完全翻车了,服务器也已经关闭.其中的智能排插TC1,也因为服务器关闭,app无法登陆,定时开关等功能完全无法使用,为此,针对TC1智能排插的硬件,开发供自己使用的FW及对应app,确保自己能够正常使用此排插.
+斐讯0元购完全翻车了,服务器也已经关闭.智能排插TC1也因为服务器关闭,app无法登陆,定时开关等功能完全无法使用.
+
+为此,针对TC1智能排插的硬件,开发供自己使用的FW及对应app,确保自己能够正常使用此排插.取名为zTC1.
 
 
 
-APP: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_Android_MQTT)
+APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_Android_MQTT)
 
 
 
 
 
-## 
+
 
 ## 编译烧录
 
 ### 编译
+
+> 如果你不是开发人员,可以忽略此项
 
 TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operating System)开发.[MiCO简介点这里](http://developer.mxchip.com/handbooks/101)
 
