@@ -9,7 +9,7 @@
 
 APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_Android_MQTT)
 
-> 如果你有任何问题,可以直接在此项目中提交issue,或给我发送邮件:zip_zhang@foxmail.com,邮件标题中请注明项目
+> 如果你有任何问题,可以直接在此项目中提交issue,或给我发送邮件:zip_zhang@foxmail.com,邮件标题中请注明项目.
 
 
 
@@ -43,6 +43,3 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 - [ ] ota在线升级(暂时未做)
 - [ ] app实时显示功率(暂时未测量功率模块的电路.暂时未实现此功能)
 - [ ] ~~根据功率自动开关~~(可能不会做这个功能)
-
-  
-
