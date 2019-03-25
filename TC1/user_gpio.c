@@ -115,10 +115,8 @@ static void key_short_press( void )
     }
 
     char *json_str = cJSON_Print( json_send );
-    if ( !user_mqtt_isconnect( ) ) //·¢ËÍÊý¾Ý
-        user_udp_send( json_str );
-    else
-        user_mqtt_send( json_str );
+
+    user_send(false,json_str);
 
     free( (void *) json_str );
     cJSON_Delete( json_send );

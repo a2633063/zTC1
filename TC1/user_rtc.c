@@ -180,10 +180,7 @@ void rtc_thread( mico_thread_arg_t arg )
                                 if ( buf != NULL )
                                 {
                                     sprintf( buf, "{\"idx\":%d,\"nvalue\":%d}", user_config->plug[i].idx, user_config->plug[i].on );
-                                    if ( !user_mqtt_isconnect( ) )
-                                        user_udp_send( buf ); //发送数据
-                                    else
-                                        user_mqtt_send( buf );
+                                    user_send(false,buf);
                                     free( buf );
                                 }
                             }
@@ -239,10 +236,7 @@ void rtc_thread( mico_thread_arg_t arg )
             }
 
             char *json_str = cJSON_Print( json_send );
-            if ( !user_mqtt_isconnect( ) )
-                user_udp_send( json_str ); //发送数据
-            else
-                user_mqtt_send( json_str );
+            user_send(false,json_str);//发送数据
 
             free( json_str );
             cJSON_Delete( json_send );
