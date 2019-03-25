@@ -34,7 +34,7 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 ## 功能
 
 
-- [x] 暂时计划完成以下功能,后续有需要继续添加
+暂时完成以下功能,后续有需要继续添加
 
 - [x] 4个USB充电(3个普通和1个快充接口)(USB充电软件无法控制,所有应该和原固件功能相同)
 - [x] MQTT客户端连接服务器(无MQTT时使用UDP通信,如果你会内网穿透,就可能实现远程控制功能)
