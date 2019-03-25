@@ -3,6 +3,7 @@
 #include "main.h"
 #include "user_gpio.h"
 #include "cJSON/cJSON.h"
+#include "user_ota.h"
 
 uint32_t last_time = 0;
 

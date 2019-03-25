@@ -5,7 +5,6 @@
 #include "user_mqtt_client.h"
 #include "user_udp.h"
 #include "cJSON/cJSON.h"
-#include "user_tftp_ota.h"
 
 mico_gpio_t relay[Relay_NUM] = { Relay_0, Relay_1, Relay_2, Relay_3, Relay_4, Relay_5 };
 

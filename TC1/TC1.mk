@@ -32,7 +32,7 @@ $(NAME)_SOURCES := main.c\
 				   user_sntp.c\
 				   user_rtc.c\
 				   user_mqtt_client.c\
-				   user_tftp_ota.c\
+				   user_ota.c\
 				   user_function.c
 				   
 $(NAME)_COMPONENTS := protocols/SNTP\
