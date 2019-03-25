@@ -134,11 +134,25 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
             }
             cJSON_AddNumberToObject( json_send, "nvalue", p_nvalue->valueint );
         }
-
+        //解析版本
+        cJSON *p_version = cJSON_GetObjectItem( pJsonRoot, "version" );
+        if ( p_version )
+        {
+            os_log("version:%s",VERSION);
+            cJSON_AddStringToObject( json_send, "version", VERSION );
+        }
         //解析主机setting-----------------------------------------------------------------
         cJSON *p_setting = cJSON_GetObjectItem( pJsonRoot, "setting" );
         if ( p_setting )
         {
+            //解析ota
+            cJSON *p_ota = cJSON_GetObjectItem( p_setting, "ota" );
+            if ( p_ota )
+            {
+                if ( cJSON_IsString( p_ota ) )
+                    user_ota_start( p_ota->valuestring, NULL );
+            }
+
             cJSON *json_setting_send = cJSON_CreateObject( );
             //设置设备名称/deviceid
             cJSON *p_setting_name = cJSON_GetObjectItem( p_setting, "name" );
@@ -330,7 +344,7 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
     }
     cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
 //    if ( p_plug || p_nvalue )
-        cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
+    cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
 
     cJSON_AddItemToObject( pJsonSend, plug_str, json_plug_send );
     return return_flag;
