@@ -13,6 +13,10 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 
 
 
+建立了个QQ群,有问题可以加入来讨论:**459996006**,备注zTC1即可
+
+
+
 ## 直接为使用看这里
 
 如果你只是为了TC1能够继续使用不做技术开发交流等,请直接查看[使用步骤及方法](https://github.com/a2633063/zTC1/wiki#使用步骤及方法), 
@@ -41,5 +45,5 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 - [x] app控制每个接口独立开关
 - [x] app配置每个接口拥有独立的5组定时开关
 - [x] ota在线升级
-- [ ] app实时显示功率(暂时未测量功率模块的电路.暂时未实现此功能)
+- [ ] app实时显示功率(正在进行)
 - [ ] ~~根据功率自动开关~~(可能不会做这个功能)
