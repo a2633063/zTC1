@@ -40,6 +40,6 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 - [x] MQTT客户端连接服务器(无MQTT时使用UDP通信,如果你会内网穿透,就可能实现远程控制功能)
 - [x] app控制每个接口独立开关
 - [x] app配置每个接口拥有独立的5组定时开关
-- [ ] ota在线升级(暂时未做)
+- [x] ota在线升级
 - [ ] app实时显示功率(暂时未测量功率模块的电路.暂时未实现此功能)
 - [ ] ~~根据功率自动开关~~(可能不会做这个功能)

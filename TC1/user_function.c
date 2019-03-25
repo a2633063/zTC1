@@ -206,6 +206,9 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
             }
 
             //开发返回数据
+            //返回设备ota
+            if ( p_ota ) cJSON_AddStringToObject( json_setting_send, "ota", p_ota->valuestring );
+
             //返回设备名称/deviceid
             if ( p_setting_name ) cJSON_AddStringToObject( json_setting_send, "name", sys_config->micoSystemConfig.name );
             //返回mqtt ip
