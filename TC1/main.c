@@ -82,13 +82,13 @@ int application_start( void )
 
     OSStatus err = kNoErr;
 
-    for ( i = 0; i < Relay_NUM; i++ )
-    {
-        MicoGpioOutputLow( Relay[(i)] );
-        MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
-        MicoGpioOutputLow( Relay[(i)] );
-        //MicoGpioOutputHigh(Relay[i]);
-    }
+//    for ( i = 0; i < Relay_NUM; i++ )
+//    {
+//        MicoGpioOutputLow( Relay[(i)] );
+//        MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
+//        MicoGpioOutputLow( Relay[(i)] );
+//        //MicoGpioOutputHigh(Relay[i]);
+//    }
     /* Create mico system context and read application's config data from flash */
     sys_config = mico_system_context_init( sizeof(user_config_t) );
     user_config = ((system_context_t *) sys_config)->user_config_data;
@@ -107,8 +107,7 @@ int application_start( void )
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
     for ( i = 0; i < Relay_NUM; i++ )
     {
-        //todo É¾³ý²âÊÔ´úÂë ¹Ø±ÕÏµÍ³ledµÆ
-        user_config->plug[i].on = 0;
+        MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
         user_relay_set( i, user_config->plug[i].on );
     }
     MicoSysLed(0);
