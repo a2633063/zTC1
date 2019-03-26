@@ -4,6 +4,7 @@
 #include "user_wifi.h"
 #include "user_rtc.h"
 #include "user_udp.h"
+#include "user_power.h"
 #include "user_mqtt_client.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
@@ -27,15 +28,14 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     {
         IPStatusTypedef para;
         micoWlanGetIPStatus( &para, Station );
-        strcpy( strMac, para.mac);
+        strcpy( strMac, para.mac );
     }
 
-    unsigned char mac1,mac2;
-    mac1=strtohex(strMac[8],strMac[9]);
-    mac2=strtohex(strMac[10],strMac[11]);
+    unsigned char mac1, mac2;
+    mac1 = strtohex( strMac[8], strMac[9] );
+    mac2 = strtohex( strMac[10], strMac[11] );
 
-
-    sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME,mac1,mac2 );
+    sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME, mac1, mac2 );
     user_config_t* userConfigDefault = user_config_data;
 
     userConfigDefault->mqtt_ip[0] = 0;
@@ -51,15 +51,14 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
         userConfigDefault->plug[i].on = 1;
 
         //²å×ùÃû³Æ ²å¿Ú1-6
-        userConfigDefault->plug[i].name[0]=0xe6;
-        userConfigDefault->plug[i].name[1]=0x8f;
-        userConfigDefault->plug[i].name[2]=0x92;
-        userConfigDefault->plug[i].name[3]=0xe5;
-        userConfigDefault->plug[i].name[4]=0x8f;
-        userConfigDefault->plug[i].name[5]=0xa3;
-        userConfigDefault->plug[i].name[6]=i+'1';
-        userConfigDefault->plug[i].name[7]=0;
-
+        userConfigDefault->plug[i].name[0] = 0xe6;
+        userConfigDefault->plug[i].name[1] = 0x8f;
+        userConfigDefault->plug[i].name[2] = 0x92;
+        userConfigDefault->plug[i].name[3] = 0xe5;
+        userConfigDefault->plug[i].name[4] = 0x8f;
+        userConfigDefault->plug[i].name[5] = 0xa3;
+        userConfigDefault->plug[i].name[6] = i + '1';
+        userConfigDefault->plug[i].name[7] = 0;
 
 //        sprintf( userConfigDefault->plug[i].name, "²å×ù%d", i );//±àÂëÒì³£
         for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
@@ -85,7 +84,9 @@ int application_start( void )
 
     for ( i = 0; i < Relay_NUM; i++ )
     {
+        MicoGpioOutputLow( Relay[(i)] );
         MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
+        MicoGpioOutputLow( Relay[(i)] );
         //MicoGpioOutputHigh(Relay[i]);
     }
     /* Create mico system context and read application's config data from flash */
@@ -95,8 +96,6 @@ int application_start( void )
 
     err = mico_system_init( sys_config );
     require_noerr( err, exit );
-
-
 
     MicoGpioInitialize( (mico_gpio_t) Button, INPUT_PULL_UP );
     if ( !MicoGpioInputGet( Button ) )
@@ -108,9 +107,11 @@ int application_start( void )
     MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
     for ( i = 0; i < Relay_NUM; i++ )
     {
-        user_relay_set(i,user_config->plug[i].on);
+        //todo É¾³ı²âÊÔ´úÂë ¹Ø±ÕÏµÍ³ledµÆ
+        user_config->plug[i].on = 0;
+        user_relay_set( i, user_config->plug[i].on );
     }
-    MicoSysLed(0);
+//    MicoSysLed(0);
     if ( user_config->version != USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
         os_log( "WARNGIN: user params restored!" );
@@ -145,7 +146,7 @@ int application_start( void )
     err = user_rtc_init( );
     require_noerr( err, exit );
 
-    err = user_udp_init( );
+    user_udp_init( );
     while ( 1 )
     {
 //        mico_thread_msleep(500);

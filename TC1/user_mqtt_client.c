@@ -118,6 +118,8 @@ Network n;  // socket network for mqtt client
 static mico_worker_thread_t mqtt_client_worker_thread; /* Worker thread to manage send/recv events */
 static mico_timed_event_t mqtt_client_send_event;
 
+char hass_topic_in[MAX_MQTT_TOPIC_SIZE];
+char hass_topic_out[MAX_MQTT_TOPIC_SIZE];
 /******************************************************
  *               Function Definitions
  ******************************************************/
@@ -126,6 +128,12 @@ static mico_timed_event_t mqtt_client_send_event;
 OSStatus user_mqtt_init( void )
 {
     OSStatus err = kNoErr;
+
+
+    sprintf(hass_topic_out,"ztc1/%s/out",strMac);
+    sprintf(hass_topic_in,"ztc1/%s/in",strMac);
+
+
 
 #ifdef MQTT_CLIENT_SSL_ENABLE
     int mqtt_thread_stack_size = 0x3000;
@@ -295,6 +303,9 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
     mqtt_log("MQTT client subscribe success! recv_topic=[%s].", MQTT_CLIENT_SUB_TOPIC1);
 
+    rc = MQTTSubscribe( &c, hass_topic_out, QOS0, messageArrived );
+    require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
+    mqtt_log("MQTT client subscribe success! recv_topic=[%s].", hass_topic_out);
     /*4.1 连接成功后先更新发送一次数据*/
     isconnect = true;
     uint8_t *buf1 = NULL;
@@ -431,8 +442,7 @@ OSStatus user_recv_handler( void *arg )
     return err;
 }
 
-/* Application collect data and seng them to MQTT send queue */
-OSStatus user_mqtt_send( char *arg )
+OSStatus user_mqtt_send_topic( char *topic, char *arg )
 {
     OSStatus err = kUnknownErr;
     p_mqtt_send_msg_t p_send_msg = NULL;
@@ -455,7 +465,7 @@ OSStatus user_mqtt_send( char *arg )
     p_send_msg->retained = 0;
     p_send_msg->datalen = strlen( arg );
     memcpy( p_send_msg->data, arg, p_send_msg->datalen );
-    strncpy( p_send_msg->topic, MQTT_CLIENT_PUB_TOPIC, MAX_MQTT_TOPIC_SIZE );
+    strncpy( p_send_msg->topic, topic, MAX_MQTT_TOPIC_SIZE );
 
     err = mico_rtos_push_to_queue( &mqtt_msg_send_queue, &p_send_msg, 0 );
     require_noerr( err, exit );
@@ -465,6 +475,13 @@ OSStatus user_mqtt_send( char *arg )
     exit:
     if ( err != kNoErr && p_send_msg ) free( p_send_msg );
     return err;
+}
+
+/* Application collect data and seng them to MQTT send queue */
+OSStatus user_mqtt_send( char *arg )
+{
+    user_mqtt_send_topic(hass_topic_in,arg);
+    return user_mqtt_send_topic(MQTT_CLIENT_PUB_TOPIC,arg);
 
 }
 

@@ -4,7 +4,7 @@
 #include "mico.h"
 #include "MiCOKit_EXT.h"
 
-#define VERSION "v0.2.1"
+#define VERSION "v0.3"
 
 #define TYPE 1
 #define TYPE_NAME "zTC1"
@@ -20,6 +20,7 @@
 
 #define Led         MICO_GPIO_5
 #define Button      MICO_GPIO_23
+#define POWER      MICO_GPIO_15
 
 #define Relay_ON     1
 #define Relay_OFF     0
