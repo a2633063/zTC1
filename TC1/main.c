@@ -111,7 +111,7 @@ int application_start( void )
         user_config->plug[i].on = 0;
         user_relay_set( i, user_config->plug[i].on );
     }
-//    MicoSysLed(0);
+    MicoSysLed(0);
     if ( user_config->version != USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
         os_log( "WARNGIN: user params restored!" );
