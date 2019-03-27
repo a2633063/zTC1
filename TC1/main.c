@@ -25,18 +25,10 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     int i, j;
     UNUSED_PARAMETER( size );
 
-    if ( strMac[0] == 0 )
-    {
-        IPStatusTypedef para;
-        micoWlanGetIPStatus( &para, Station );
-        strcpy( strMac, para.mac );
-    }
 
-    unsigned char mac1, mac2;
-    mac1 = strtohex( strMac[8], strMac[9] );
-    mac2 = strtohex( strMac[10], strMac[11] );
+    mico_system_context_get( )->micoSystemConfig.name[0] = 1;   //在下次重启时使用默认名称
+    mico_system_context_get( )->micoSystemConfig.name[1] = 0;
 
-    sprintf( mico_system_context_get( )->micoSystemConfig.name, ZTC1_NAME, mac1, mac2 );
     user_config_t* userConfigDefault = user_config_data;
 
     userConfigDefault->mqtt_ip[0] = 0;
@@ -71,7 +63,6 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
             userConfigDefault->plug[i].task[j].action = 1;
         }
     }
-
 //    mico_system_context_update( sys_config );
 
 }
@@ -105,13 +96,14 @@ int application_start( void )
         wifi_status = WIFI_STATE_NOEASYLINK;  //wifi_init中启动easylink
     }
 
-    MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_5, OUTPUT_PUSH_PULL );
+    MicoGpioInitialize( (mico_gpio_t) Led, OUTPUT_PUSH_PULL );
     for ( i = 0; i < Relay_NUM; i++ )
     {
         MicoGpioInitialize( Relay[i], OUTPUT_PUSH_PULL );
         user_relay_set( i, user_config->plug[i].on );
     }
-    MicoSysLed(0);
+    MicoSysLed( 0 );
+
     if ( user_config->version != USER_CONFIG_VERSION || user_config->plug[0].task[0].hour < 0 || user_config->plug[0].task[0].hour > 23 )
     {
         os_log( "WARNGIN: user params restored!" );
@@ -119,6 +111,23 @@ int application_start( void )
         require_noerr( err, exit );
     }
 
+    if ( sys_config->micoSystemConfig.name[0] == 1 )
+    {
+        IPStatusTypedef para;
+        os_log( "micoWlanGetIPStatus:%d", micoWlanGetIPStatus( &para, Station ));   //mac读出来全部是0??!!!
+        strcpy( strMac, para.mac );
+        os_log( "result:%s",strMac );
+        os_log( "result:%s",para.mac );
+
+
+        unsigned char mac1, mac2;
+        mac1 = strtohex( strMac[8], strMac[9] );
+        mac2 = strtohex( strMac[10], strMac[11] );
+        os_log( "strtohex:0x%02x%02x",mac1,mac2 );
+        sprintf( sys_config->micoSystemConfig.name, ZTC1_NAME, mac1, mac2 );
+    }
+
+    os_log( "device name:%s",sys_config->micoSystemConfig.name );
     os_log( "mqtt_ip:%s",user_config->mqtt_ip );
     os_log( "mqtt_port:%d",user_config->mqtt_port );
     os_log( "mqtt_user:%s",user_config->mqtt_user );
