@@ -1,7 +1,7 @@
 #define os_log(format, ...)  custom_log("OTA", format, ##__VA_ARGS__)
 
 #include "mico.h"
-#include "ota_server.h"
+#include "ota_server/ota_server.h"
 #include "main.h"
 #include "user_udp.h"
 #include "user_mqtt_client.h"

@@ -20,7 +20,7 @@ void user_led_set( char x )
 
 bool relay_out( void )
 {
-    char i;
+    unsigned char i;
     for ( i = 0; i < PLUG_NUM; i++ )
     {
         if ( user_config->plug[i].on != 0 )
@@ -30,17 +30,18 @@ bool relay_out( void )
     }
     return false;
 }
-#define set_relay(a,b) if(((b) == 1) ? Relay_ON : Relay_OFF) MicoGpioOutputHigh( relay[(a)] );else MicoGpioOutputLow( relay[(a)] )
+
 /*user_relay_set
  * 设置继电器开关
  * x:编号 0-5
  * y:开关 0:关 1:开
  */
-void user_relay_set( char x, char y )
+void user_relay_set(unsigned char x,unsigned char y )
 {
-    if ( x < 0 || x >= PLUG_NUM ) return;
+    if (x >= PLUG_NUM ) return;
 
-    set_relay( x, y );
+    if((y == 1) ? Relay_ON : Relay_OFF) MicoGpioOutputHigh( relay[x] );else MicoGpioOutputLow( relay[x] );
+
     user_config->plug[x].on = y;
 
     if ( relay_out( ) )

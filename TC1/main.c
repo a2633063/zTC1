@@ -6,6 +6,7 @@
 #include "user_udp.h"
 #include "user_power.h"
 #include "user_mqtt_client.h"
+#include "user_function.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 

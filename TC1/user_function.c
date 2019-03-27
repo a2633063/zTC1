@@ -1,9 +1,13 @@
 #define os_log(format, ...)  custom_log("FUNCTION", format, ##__VA_ARGS__)
 
+#include "TimeUtils.h"
+
 #include "main.h"
 #include "user_gpio.h"
 #include "cJSON/cJSON.h"
 #include "user_ota.h"
+#include "user_mqtt_client.h"
+#include "user_udp.h"
 
 uint32_t last_time = 0;
 
@@ -19,8 +23,8 @@ typedef struct _user_json_context_t
     int8_t val;
 } user_json_context_t;
 
-bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonSend );
-bool json_plug_task_analysis( char x, char y, cJSON * pJsonRoot, cJSON * pJsonSend );
+bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend );
+bool json_plug_task_analysis(unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend );
 
 void user_send( int udp_flag, char *s )
 {
@@ -32,8 +36,8 @@ void user_send( int udp_flag, char *s )
 
 void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
 {
-    OSStatus err = kNoErr;
-    char i;
+
+    unsigned char i;
     bool update_user_config_flag = false;   //标志位,记录最后是否需要更新储存的数据
     bool return_flag = true;    //为true时返回json结果,否则不返回
 
@@ -119,7 +123,7 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
             if ( cJSON_IsNumber( p_nvalue ) )
             {
                 uint32_t now_time = UpTicks( );
-                os_log( "system_get_time:%d,%d = %09d\r\n", last_time, now_time, (now_time - last_time) );
+//                os_log( "system_get_time:%d,%d = %09d\r\n", last_time, now_time, (now_time - last_time) );
                 if ( now_time - last_time < 1000 && p_idx )
                 {
                     return_flag = false;
@@ -226,7 +230,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         }
 
         //解析plug-----------------------------------------------------------------
-        char plug_str[] = "plug_X";
         for ( i = 0; i < PLUG_NUM; i++ )
         {
             if ( json_plug_analysis( udp_flag, i, pJsonRoot, json_send ) )
@@ -256,11 +259,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
     }
 
     cJSON_Delete( pJsonRoot );
-    return;
-    exit:
-    os_log( "user_function_cmd_received ERROR:0x%x", err );
-
-    cJSON_Delete( pJsonRoot );
 
 }
 
@@ -269,7 +267,7 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
  *udp_flag:发送udp/mqtt标志位,此处修改插座开关状态时,需要实时更新给domoticz
  *x:插座编号
  */
-bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonSend )
+bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend )
 {
     if ( !pJsonRoot ) return false;
     if ( !pJsonSend ) return false;
@@ -346,7 +344,7 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
             cJSON_AddItemToObject( json_plug_send, "setting", json_plug_setting_send );
         }
     }
-    cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
+//    cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
 //    if ( p_plug || p_nvalue )
     cJSON_AddNumberToObject( json_plug_send, "on", user_config->plug[x].on );
 
@@ -358,7 +356,7 @@ bool json_plug_analysis( int udp_flag, char x, cJSON * pJsonRoot, cJSON * pJsonS
  *解析处理定时任务json
  *x:插座编号 y:任务编号
  */
-bool json_plug_task_analysis( char x, char y, cJSON * pJsonRoot, cJSON * pJsonSend )
+bool json_plug_task_analysis( unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend )
 {
     if ( !pJsonRoot ) return false;
     bool return_flag = false;

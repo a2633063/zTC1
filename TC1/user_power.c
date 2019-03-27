@@ -1,7 +1,7 @@
 #define os_log(format, ...)  custom_log("OTA", format, ##__VA_ARGS__)
+#include "TimeUtils.h"
 
 #include "mico.h"
-#include "ota_server.h"
 #include "main.h"
 #include "user_udp.h"
 #include "user_mqtt_client.h"
@@ -12,7 +12,7 @@ mico_timer_t power_timer;
 static uint32_t timer_count_last = 0;
 static uint32_t timer_count = 0;
 static uint32_t timer = 0;
-static uint8_t pin_input_last = 0;
+
 static void power_timer_handler( void* arg )
 {
 

@@ -26,6 +26,7 @@ NAME := App_TC1
 
 $(NAME)_SOURCES := main.c\
 				   cJSON/cJSON.c\
+				   ota_server/ota_server.c\
 				   user_wifi.c\
 				   user_gpio.c\
 				   user_udp.c\
@@ -38,5 +39,5 @@ $(NAME)_SOURCES := main.c\
 				   
 $(NAME)_COMPONENTS := protocols/SNTP\
 					protocols/mqtt\
-					daemons/ota_server
+					utilities/url
 					

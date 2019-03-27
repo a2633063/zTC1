@@ -22,7 +22,10 @@
 #include "mico.h"
 #include "MQTTClient.h"
 #include "user_function.h"
+#include "user_gpio.h"
+#include "user_mqtt_client.h"
 #include "cJSON/cJSON.h"
+
 /******************************************************
  *                      Macros
  ******************************************************/
