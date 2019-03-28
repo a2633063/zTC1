@@ -99,28 +99,12 @@ static void key_short_press( void )
         user_relay_set_all( 1 );
     }
 
-    char relay_out_temp;
-    cJSON *json_send = cJSON_CreateObject( );
-    cJSON_AddStringToObject( json_send, "mac", strMac );
-    if ( user_config->idx >= 0 )
-    cJSON_AddNumberToObject( json_send, "idx", user_config->idx );
-
-    relay_out_temp = relay_out( ) ? 1 : 0;
-    char plug_str[] = "plug_X";
     for ( i = 0; i < PLUG_NUM; i++ )
     {
-        plug_str[5] = i + '0';
-        cJSON *json_plug_send = cJSON_CreateObject( );
-        cJSON_AddNumberToObject( json_plug_send, "on", relay_out_temp );
-        cJSON_AddItemToObject( json_send, plug_str, json_plug_send );
+        user_mqtt_send_plug_state(i);
     }
 
-    char *json_str = cJSON_Print( json_send );
 
-    user_send(false,json_str);
-
-    free( (void *) json_str );
-    cJSON_Delete( json_send );
 
 }
 mico_timer_t user_key_timer;

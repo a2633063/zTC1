@@ -16,12 +16,7 @@ void user_function_set_last_time( )
     last_time = UpTicks( );
 }
 
-typedef struct _user_json_context_t
-{
-    int8_t idx;
-    char name[maxNameLen];
-    int8_t val;
-} user_json_context_t;
+
 
 bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend );
 bool json_plug_task_analysis(unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend );
@@ -66,79 +61,17 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
     }
 
     //以下为解析命令部分
-    cJSON *p_idx = cJSON_GetObjectItem( pJsonRoot, "idx" );
-    cJSON *p_description = cJSON_GetObjectItem( pJsonRoot, "description" );
     cJSON *p_name = cJSON_GetObjectItem( pJsonRoot, "name" );
     cJSON *p_mac = cJSON_GetObjectItem( pJsonRoot, "mac" );
 
-    //判断p_idx,使用"idx"作为主要字符串时
-    for ( i = 0; i < PLUG_NUM; i++ )
-    {
-        //仅从插座的idx值判断 成立时不处理其他功能,仅改变插座状态
-        if ( p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint >= 0 && p_idx->valueint == user_config->plug[i].idx )
-        {
-            cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
-            if ( p_nvalue && cJSON_IsNumber( p_nvalue ) )
-            {
-                if ( p_nvalue->valueint != user_config->plug[i].on )
-                {
-                    user_relay_set( i, p_nvalue->valueint );
-                    mico_system_context_update( sys_config ); //储存当前开关状态
-                    cJSON *json_send = cJSON_CreateObject( );
-                    cJSON_AddNumberToObject( json_send, "idx", user_config->plug[i].idx );
-                    cJSON_AddNumberToObject( json_send, "nvalue", user_config->plug[i].on );
-                    cJSON_AddStringToObject( json_send, "mac", strMac );
-
-                    char strTemp1[] = "plug_X";
-                    strTemp1[5] = i + '0';
-                    cJSON *json_send_plug_on = cJSON_CreateObject( );
-                    cJSON_AddNumberToObject( json_send_plug_on, "on", p_nvalue->valueint );
-
-                    cJSON_AddItemToObject( json_send, strTemp1, json_send_plug_on );
-
-                    char *json_str = cJSON_Print( json_send );
-                    user_send( udp_flag, json_str ); //发送数据
-                    free( json_str );
-                    cJSON_Delete( json_send );
-                }
-            }
-            cJSON_Delete( pJsonRoot );
-            return;
-        }
-    }
-
     //开始正式处理所有命令
-    if ( (p_idx && cJSON_IsNumber( p_idx ) && p_idx->valueint == user_config->idx)  //idx
-         || (p_description && cJSON_IsString( p_description ) && strcmp( p_description->valuestring, sys_config->micoSystemConfig.name ) == 0)   //p_description name
-         || (p_name && cJSON_IsString( p_name ) && strcmp( p_name->valuestring, sys_config->micoSystemConfig.name ) == 0)    //name
+    if ( (p_name && cJSON_IsString( p_name ) && strcmp( p_name->valuestring, sys_config->micoSystemConfig.name ) == 0)    //name
          || (p_mac && cJSON_IsString( p_mac ) && strcmp( p_mac->valuestring, strMac ) == 0)   //mac
          )
     {
         cJSON *json_send = cJSON_CreateObject( );
         cJSON_AddStringToObject( json_send, "mac", strMac );
 
-        cJSON *p_nvalue = cJSON_GetObjectItem( pJsonRoot, "nvalue" );
-        if ( p_nvalue )
-        {
-            if ( cJSON_IsNumber( p_nvalue ) )
-            {
-                uint32_t now_time = UpTicks( );
-//                os_log( "system_get_time:%d,%d = %09d\r\n", last_time, now_time, (now_time - last_time) );
-                if ( now_time - last_time < 1000 && p_idx )
-                {
-                    return_flag = false;
-                } else
-                {
-                    if ( p_nvalue->valueint != user_config->plug[i].on )
-                    {
-                        user_relay_set_all( p_nvalue->valueint );
-                        update_user_config_flag = true;
-                    }
-                }
-                user_function_set_last_time( );
-            }
-            cJSON_AddNumberToObject( json_send, "nvalue", p_nvalue->valueint );
-        }
         //解析版本
         cJSON *p_version = cJSON_GetObjectItem( pJsonRoot, "version" );
         if ( p_version )
@@ -199,15 +132,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
                 sprintf( user_config->mqtt_password, p_mqtt_password->valuestring );
             }
 
-            //设置domoticz idx
-            cJSON *p_setting_idx = cJSON_GetObjectItem( p_setting, "idx" );
-            if ( p_setting_idx && cJSON_IsNumber( p_setting_idx ) )
-            {
-                update_user_config_flag = true;
-                user_config->idx = p_setting_idx->valueint;
-                os_log( "idx:%d",user_config->idx );
-                mico_system_context_update( sys_config );
-            }
 
             //开发返回数据
             //返回设备ota
@@ -223,8 +147,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
             if ( p_mqtt_user ) cJSON_AddStringToObject( json_setting_send, "mqtt_user", user_config->mqtt_user );
             //返回mqtt password
             if ( p_mqtt_password ) cJSON_AddStringToObject( json_setting_send, "mqtt_password", user_config->mqtt_password );
-            //返回domoticz idx
-            if ( p_setting_idx ) cJSON_AddNumberToObject( json_setting_send, "idx", user_config->idx );
 
             cJSON_AddItemToObject( json_send, "setting", json_setting_send );
         }
@@ -238,9 +160,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
 
         cJSON_AddStringToObject( json_send, "name", sys_config->micoSystemConfig.name );
 
-        //if (p_idx)
-        if ( user_config->idx >= 0 )
-        cJSON_AddNumberToObject( json_send, "idx", user_config->idx );
 
         if ( return_flag == true )
         {
@@ -291,18 +210,8 @@ bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON
             {
                 user_relay_set( x, p_plug_on->valueint );
                 return_flag = true;
-                if ( user_config->plug[x].idx > 0 )
-                {
-                    cJSON *json_return_now = cJSON_CreateObject( );
-                    cJSON_AddNumberToObject( json_return_now, "idx", user_config->plug[x].idx );
-                    cJSON_AddNumberToObject( json_return_now, "nvalue", user_config->plug[x].on );
-                    char *json_str = cJSON_Print( json_return_now );
-                    user_send( udp_flag, json_str ); //发送数据
-                    free( json_str );
-                    cJSON_Delete( json_return_now );
-                }
             }
-
+            user_mqtt_send_plug_state(x);
         }
 
         //解析plug中setting项目----------------------------------------------
@@ -320,18 +229,6 @@ bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON
                     sprintf( user_config->plug[x].name, p_plug_setting_name->valuestring );
                 }
                 cJSON_AddStringToObject( json_plug_setting_send, "name", user_config->plug[x].name );
-            }
-
-            //解析plug中setting中idx----------------------------------------
-            cJSON *p_plug_setting_idx = cJSON_GetObjectItem( p_plug_setting, "idx" );
-            if ( p_plug_setting_idx )
-            {
-                if ( cJSON_IsNumber( p_plug_setting_idx ) )
-                {
-                    return_flag = true;
-                    user_config->plug[x].idx = p_plug_setting_idx->valueint;
-                }
-                cJSON_AddNumberToObject( json_plug_setting_send, "idx", user_config->plug[x].idx );
             }
 
             //解析plug中setting中task----------------------------------------

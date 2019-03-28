@@ -171,19 +171,7 @@ void rtc_thread( mico_thread_arg_t arg )
                         {
                             user_relay_set( i, user_config->plug[i].task[j].action );
                             update_user_config_flag = 1;
-
-                            //更新domoticz状态
-                            if ( user_config->plug[i].idx >= 0 )
-                            {
-                                uint8_t *buf = NULL;
-                                buf = malloc( 32 ); //idx为1位时长度为24
-                                if ( buf != NULL )
-                                {
-                                    sprintf( buf, "{\"idx\":%d,\"nvalue\":%d}", user_config->plug[i].idx, user_config->plug[i].on );
-                                    user_send(false,buf);
-                                    free( buf );
-                                }
-                            }
+                            user_mqtt_send_plug_state(i);
                         }
                         if ( repeat == 0x00 )
                         {

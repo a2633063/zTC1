@@ -4,14 +4,14 @@
 #include "mico.h"
 #include "MiCOKit_EXT.h"
 
-#define VERSION "v0.5"
+#define VERSION "v0.6"
 
 #define TYPE 1
 #define TYPE_NAME "zTC1"
 
 #define ZTC1_NAME "zTC1_%02X%02X"
 
-#define USER_CONFIG_VERSION 1
+#define USER_CONFIG_VERSION 2
 #define SETTING_MQTT_STRING_LENGTH_MAX  32      //必须 4 字节对齐。
 
 #define PLUG_NAME_LENGTH 32
@@ -45,7 +45,6 @@ typedef struct
 typedef struct
 {
     char name[PLUG_NAME_LENGTH];
-    char idx;
     char on;    //记录当前开关
     user_plug_task_config_t task[PLUG_TIME_TASK_NUM];
 
@@ -61,7 +60,6 @@ typedef struct
 //     char mqtt_device_id[SETTING_MQTT_STRING_LENGTH_MAX];        //mqtt service user  device name
 
     char version;
-    char idx;
     user_plug_config_t plug[PLUG_NUM];
 } user_config_t;
 

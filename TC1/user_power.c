@@ -31,8 +31,9 @@ static void power_timer_handler( void* arg )
 static void power_irq_handler( void* arg )
 {
 //    timer_count_last=timer_count;
-    timer_count = UpTicks( );
+    timer_count = mico_nanosecond_clock_value();
     timer=timer_count-timer_count_last;
+    if(timer_count<timer_count_last) timer+=0xffffffff;
 }
 
 void user_power_init( void )

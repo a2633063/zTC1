@@ -36,11 +36,9 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
     userConfigDefault->mqtt_user[0] = 0;
     userConfigDefault->mqtt_password[0] = 0;
 
-    userConfigDefault->idx = -1;
     userConfigDefault->version = USER_CONFIG_VERSION;
     for ( i = 0; i < PLUG_NUM; i++ )
     {
-        userConfigDefault->plug[i].idx = -1;
         userConfigDefault->plug[i].on = 1;
 
         //²å×ùÃû³Æ ²å¿Ú1-6
@@ -134,12 +132,10 @@ int application_start( void )
     os_log( "mqtt_password:%s",user_config->mqtt_password );
 
     os_log( "version:%d",user_config->version );
-    os_log( "idx:%d",user_config->idx );
 //    for ( i = 0; i < PLUG_NUM; i++ )
 //    {
 //        os_log("plug_%d:",i);
 //        os_log("\tname:%s:",user_config->plug[i].name);
-//        os_log("\tidx:%d:",user_config->plug[i].idx);
 //        for ( j = 0; j < PLUG_TIME_TASK_NUM; j++ )
 //        {
 //            os_log("\t\ton:%d\t %02d:%02d repeat:0x%X",user_config->plug[i].task[j].on,
@@ -154,13 +150,16 @@ int application_start( void )
     require_noerr( err, exit );
     err = user_rtc_init( );
     require_noerr( err, exit );
-
     user_udp_init( );
+//    user_power_init();
     while ( 1 )
     {
 //        mico_thread_msleep(500);
 //        MicoGpioOutputTrigger(MICO_GPIO_5);
 //        mico_gpio_output_toggle( MICO_SYS_LED );
+//        mico_rtos_delay_milliseconds(1000);
+//        uint32_t a=mico_nanosecond_clock_value();
+//        os_log("nano=%lu",a/1000);
 //        mico_rtos_delay_milliseconds(1000);
     }
     exit:
