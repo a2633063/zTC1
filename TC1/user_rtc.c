@@ -114,6 +114,7 @@ void rtc_thread( mico_thread_arg_t arg )
     OSStatus err = kUnknownErr;
     LinkStatusTypeDef LinkStatus;
     mico_rtc_time_t rtc_time;
+    uint32_t power_last = 0xffffffff;
 
     mico_utc_time_t utc_time;
 
@@ -171,7 +172,7 @@ void rtc_thread( mico_thread_arg_t arg )
                         {
                             user_relay_set( i, user_config->plug[i].task[j].action );
                             update_user_config_flag = 1;
-                            user_mqtt_send_plug_state(i);
+                            user_mqtt_send_plug_state( i );
                         }
                         if ( repeat == 0x00 )
                         {
@@ -218,13 +219,13 @@ void rtc_thread( mico_thread_arg_t arg )
 
                     cJSON_AddItemToObject( json_send_plug, "setting", json_send_plug_setting );
 
-                    task_flag[i]=-1;
+                    task_flag[i] = -1;
                 }
                 cJSON_AddItemToObject( json_send, strTemp1, json_send_plug );
             }
 
             char *json_str = cJSON_Print( json_send );
-            user_send(false,json_str);//发送数据
+            user_send( false, json_str );    //发送数据
 
             free( json_str );
             cJSON_Delete( json_send );
@@ -243,6 +244,22 @@ void rtc_thread( mico_thread_arg_t arg )
                 else
                     rtc_init = 2;
             }
+        }
+
+        //发送功率数据
+        if ( power_last != power )
+        {
+            power_last = power;
+
+            uint8_t *power_buf = NULL;
+            power_buf = malloc( 128 ); //
+            if ( power_buf != NULL )
+            {
+                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\"}", strMac, power/10,power%10 );
+                user_send( 0, power_buf );
+                free( power_buf );
+            }
+            user_mqtt_hass_power();
         }
 
         mico_rtos_thread_msleep( 900 );

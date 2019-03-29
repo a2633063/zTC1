@@ -111,6 +111,7 @@ OSStatus user_recv_handler( void *arg );
 
 OSStatus user_mqtt_send_plug_state( char plug_id );
 void user_mqtt_hass_auto( char plug_id );
+void user_mqtt_hass_auto_power( void );
 
 /******************************************************
  *               Variables Definitions
@@ -264,7 +265,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     {
         isconnect = false;
         mico_rtos_thread_sleep( 3 );
-        if ( MQTT_SERVER[0] < 0x20 || MQTT_SERVER[0] > 0x7f || MQTT_SERVER_PORT < 1 ) continue;  //Œ¥≈‰÷√mqtt∑˛ŒÒ∆˜ ±≤ª¡¨Ω”
+        if ( MQTT_SERVER[0] < 0x20 || MQTT_SERVER[0] > 0x7f || MQTT_SERVER_PORT < 1 ) continue;  //Êú™ÈÖçÁΩÆmqttÊúçÂä°Âô®Êó∂‰∏çËøûÊé•
 
         micoWlanGetLinkStatus( &LinkStatus );
         if ( LinkStatus.is_connected != 1 )
@@ -307,10 +308,10 @@ void mqtt_client_thread( mico_thread_arg_t arg )
     rc = MQTTSubscribe( &c, topic_set, QOS0, messageArrived );
     require_noerr_string( rc, MQTT_reconnect, "ERROR: MQTT client subscribe err." );
     mqtt_log("MQTT client subscribe success! recv_topic=[%s].", topic_set);
-    /*4.1 ¡¨Ω”≥…π¶∫Ûœ»∏¸–¬∑¢ÀÕ“ª¥Œ ˝æ›*/
+    /*4.1 ËøûÊé•ÊàêÂäüÂêéÂÖàÊõ¥Êñ∞ÂèëÈÄÅ‰∏ÄÊ¨°Êï∞ÊçÆ*/
     isconnect = true;
     uint8_t *buf1 = NULL;
-    buf1 = malloc( 1024 ); //idxŒ™1Œª ±≥§∂»Œ™24
+    buf1 = malloc( 1024 ); //idx‰∏∫1‰ΩçÊó∂ÈïøÂ∫¶‰∏∫24
     if ( buf1 != NULL )
     {
         sprintf(
@@ -339,11 +340,12 @@ void mqtt_client_thread( mico_thread_arg_t arg )
             no_mqtt_msg_exchange = false;
         }
 
-        if ( hass_mqtt_flag>0 )
+        if ( hass_mqtt_flag > 0 )
         {
-            hass_mqtt_flag --;
-            user_mqtt_hass_auto(hass_mqtt_flag);
-            user_mqtt_send_plug_state(hass_mqtt_flag);
+            if ( hass_mqtt_flag == PLUG_NUM ) user_mqtt_hass_auto_power( );
+            hass_mqtt_flag--;
+            user_mqtt_hass_auto( hass_mqtt_flag );
+            user_mqtt_send_plug_state( hass_mqtt_flag );
         }
         /* recv msg from user worker thread to be sent to server */
         if ( FD_ISSET( msg_send_event_fd, &readfds ) )
@@ -481,7 +483,7 @@ OSStatus user_mqtt_send( char *arg )
     return user_mqtt_send_topic( topic_state, arg, 0 );
 }
 
-//∏¸–¬haø™πÿ◊¥Ã¨
+//Êõ¥Êñ∞haÂºÄÂÖ≥Áä∂ÊÄÅ
 OSStatus user_mqtt_send_plug_state( char plug_id )
 {
 
@@ -499,7 +501,7 @@ OSStatus user_mqtt_send_plug_state( char plug_id )
     if ( topic_buf ) free( topic_buf );
 }
 
-//hass mqtt◊‘∂Ø∑¢œ÷ ˝æ›∑¢ÀÕ
+//hass mqttËá™Âä®ÂèëÁé∞Êï∞ÊçÆÂºÄÂÖ≥ÂèëÈÄÅ
 void user_mqtt_hass_auto( char plug_id )
 {
     uint8_t i;
@@ -519,14 +521,59 @@ void user_mqtt_hass_auto( char plug_id )
                  "\"payload_off\":\"{\\\"mac\\\":\\\"%s\\\",\\\"plug_%d\\\":{\\\"on\\\":0}}\""
                  "}",
                  user_config->plug[plug_id].name,
-                 strMac, plug_id,
-                 strMac, plug_id,
-                 strMac, plug_id );
+                 strMac,
+                 plug_id,
+                 strMac,
+                 plug_id,
+                 strMac,
+                 plug_id );
         user_mqtt_send_topic( topic_buf, send_buf, 1 );
     }
     if ( send_buf ) free( send_buf );
     if ( topic_buf ) free( topic_buf );
 
+}
+//hass mqttËá™Âä®ÂèëÁé∞Êï∞ÊçÆÂäüÁéáÂèëÈÄÅ
+void user_mqtt_hass_auto_power( void )
+{
+    uint8_t i;
+    uint8_t *send_buf = NULL;
+    uint8_t *topic_buf = NULL;
+    send_buf = malloc( 512 ); //
+    topic_buf = malloc( 128 ); //
+    if ( send_buf != NULL && topic_buf != NULL )
+    {
+        sprintf( topic_buf, "homeassistant/sensor/%s/power/config", strMac );
+        sprintf( send_buf,
+                 "{"
+                 "\"name\":\"ÂäüÁéá\","
+                 "\"state_topic\":\"homeassistant/sensor/%s/power/state\","
+                 "\"unit_of_measurement\":\"W\","
+                 "\"icon\":\"mdi:gauge\","
+                 "\"value_template\":\"{{ value_json.power }}\""
+                 "}",
+                 strMac );
+        user_mqtt_send_topic( topic_buf, send_buf, 1 );
+    }
+    if ( send_buf ) free( send_buf );
+    if ( topic_buf ) free( topic_buf );
+}
+
+void user_mqtt_hass_power( void )
+{
+    uint8_t i;
+    uint8_t *send_buf = NULL;
+    uint8_t *topic_buf = NULL;
+    send_buf = malloc( 512 ); //
+    topic_buf = malloc( 128 ); //
+    if ( send_buf != NULL && topic_buf != NULL )
+    {
+        sprintf( topic_buf, "homeassistant/sensor/%s/power/state", strMac );
+        sprintf( send_buf, "{\"power\":\"%d.%d\"}", power/10,power%10 );
+        user_mqtt_send_topic( topic_buf, send_buf, 0 );
+    }
+    if ( send_buf ) free( send_buf );
+    if ( topic_buf ) free( topic_buf );
 }
 
 bool user_mqtt_isconnect( )

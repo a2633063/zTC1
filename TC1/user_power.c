@@ -17,11 +17,14 @@ static void power_timer_handler( void* arg )
 {
 
 //    uint8_t pin_input = MicoGpioInputGet( POWER );
-
     if ( timer_count_last != timer_count )
     {
-        os_log("power_irq_handler:%u-%u=%u",timer_count,timer_count_last,timer);
+//        os_log("power_irq_handler:%u-%u=%u",timer_count,timer_count_last,timer);
         timer_count_last = timer_count;
+
+        timer=timer/1000;
+        power=9500000/timer;
+        os_log("power_irq_handler:%u,%07u",power,timer);
     }
 //    if(timer_count==0)  os_log("power_timer_handler Hight:%d",timer_count_last);
 //    timer_count++;

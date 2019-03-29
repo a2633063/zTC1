@@ -13,6 +13,7 @@
 char rtc_init = 0;    //sntp校时成功标志位
 
 char strMac[16] = { 0 };
+uint32_t power=0;
 
 system_config_t * sys_config;
 user_config_t * user_config;
@@ -151,7 +152,7 @@ int application_start( void )
     require_noerr( err, exit );
     err = user_rtc_init( );
     require_noerr( err, exit );
-//    user_power_init();
+    user_power_init();
     while ( 1 )
     {
 //        mico_thread_msleep(500);

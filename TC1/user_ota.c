@@ -14,8 +14,8 @@ static void ota_server_status_handler( OTA_STATE_E state, float progress )
     {
         case OTA_LOADING:
             os_log("ota server is loading, progress %.2f%%", progress);
-//            if ( (int) progress == progress )
-//                sprintf( str, "{\"mac\":\"%s\",\"ota_progress\":%d}", strMac,(int) progress );
+            if ( ((int) progress)%10 == 1 )
+                sprintf( str, "{\"mac\":\"%s\",\"ota_progress\":%d}", strMac,((int) progress) );
             break;
         case OTA_SUCCE:
             os_log("ota server daemons success");

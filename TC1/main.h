@@ -4,7 +4,7 @@
 #include "mico.h"
 #include "MiCOKit_EXT.h"
 
-#define VERSION "v0.6"
+#define VERSION "v0.7"
 
 #define TYPE 1
 #define TYPE_NAME "zTC1"
@@ -66,6 +66,7 @@ typedef struct
 extern char rtc_init;
 
 extern char strMac[16];
+extern uint32_t power;
 extern system_config_t * sys_config;
 extern user_config_t * user_config;
 
