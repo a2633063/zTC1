@@ -64,6 +64,7 @@ static void wifi_get_ip_callback( IPStatusTypedef *pnet, void * arg )
 {
     os_log("got IP:%s", pnet->ip);
     wifi_status = WIFI_STATE_CONNECTED;
+    user_function_cmd_received(1,"{\"cmd\":\"device report\"}");
 }
 //wifi连接状态改变回调
 static void wifi_status_callback( WiFiEvent status, void *arg )

@@ -145,12 +145,12 @@ int application_start( void )
 //    }
 
     wifi_init( );
+    user_udp_init( );
     key_init( );
     err = user_mqtt_init( );
     require_noerr( err, exit );
     err = user_rtc_init( );
     require_noerr( err, exit );
-    user_udp_init( );
 //    user_power_init();
     while ( 1 )
     {
