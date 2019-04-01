@@ -45,5 +45,5 @@ APP端见: [SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_
 - [x] app控制每个接口独立开关
 - [x] app配置每个接口拥有独立的5组定时开关
 - [x] ota在线升级
-- [x] app实时显示功率(较大误差,正在校准数据中)
+- [x] app实时显示功率(有点误差,正在校准数据中)
 - [ ] ~~根据功率自动开关~~(可能不会做这个功能)
