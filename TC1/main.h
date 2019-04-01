@@ -4,7 +4,7 @@
 #include "mico.h"
 #include "MiCOKit_EXT.h"
 
-#define VERSION "v0.7"
+#define VERSION "v0.8"
 
 #define TYPE 1
 #define TYPE_NAME "zTC1"
@@ -26,10 +26,10 @@
 #define Relay_OFF     0
 
 #define Relay_0     MICO_GPIO_6
-#define Relay_1     MICO_GPIO_7
-#define Relay_2     MICO_GPIO_8
-#define Relay_3     MICO_GPIO_9
-#define Relay_4     MICO_GPIO_10
+#define Relay_1     MICO_GPIO_8
+#define Relay_2     MICO_GPIO_10
+#define Relay_3     MICO_GPIO_7
+#define Relay_4     MICO_GPIO_9
 #define Relay_5     MICO_GPIO_18
 #define Relay_NUM   PLUG_NUM
 
