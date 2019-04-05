@@ -57,11 +57,11 @@
 
 硬件版本在外包装底部,如图所示:
 
-![hardware_version](E:\Program\MiCO\zTC1\README\hardware_version.png)
+![hardware_version](https://raw.githubusercontent.com/a2633063/zTC1/master/README/hardware_version.png)
 
 如果没有包装,只能[拆开](#拆机接线及烧录固件相关)分辨,如图,左侧为不支持的a2版本,右侧为支持的a1版本
 
-![a1_a2](E:\Program\MiCO\zTC1\README\a1_a2.png)
+![a1_a2](https://raw.githubusercontent.com/a2633063/zTC1/master/README/a1_a2.png)
 
 
 
