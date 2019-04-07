@@ -99,6 +99,12 @@
 
 
 
+## 接入home assistant
+
+见[homeassistant接入](https://github.com/a2633063/zTC1/wiki/homeassistant接入)
+
+
+
 ## 其他内容
 
 ### 代码编译
