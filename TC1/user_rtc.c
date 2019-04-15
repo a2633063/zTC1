@@ -117,7 +117,7 @@ void rtc_thread( mico_thread_arg_t arg )
     uint32_t power_last = 0xffffffff;
 
     mico_utc_time_t utc_time;
-
+    mico_utc_time_t utc_time_last;
     while ( 1 )
     {   //上电后连接了wifi才开始走时否则等待连接
         micoWlanGetLinkStatus( &LinkStatus );
@@ -138,6 +138,14 @@ void rtc_thread( mico_thread_arg_t arg )
     {
         mico_time_get_utc_time( &utc_time );
         utc_time += 28800;
+
+        if(utc_time_last!=utc_time)
+        {
+            utc_time_last==utc_time;
+            total_time++;
+        }
+
+
         struct tm * currentTime = localtime( (const time_t *) &utc_time );
         rtc_time.sec = currentTime->tm_sec;
         rtc_time.min = currentTime->tm_min;
@@ -255,7 +263,7 @@ void rtc_thread( mico_thread_arg_t arg )
             power_buf = malloc( 128 ); //
             if ( power_buf != NULL )
             {
-                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\"}", strMac, power/10,power%10 );
+                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\",\"total_time\":%d}", strMac, power/10,power%10,total_time );
                 user_send( 0, power_buf );
                 free( power_buf );
             }

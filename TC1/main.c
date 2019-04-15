@@ -10,8 +10,10 @@
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 
-char rtc_init = 0;    //sntp校时成功标志位
 
+
+char rtc_init = 0;    //sntp校时成功标志位
+uint32_t total_time=0;
 char strMac[16] = { 0 };
 uint32_t power=0;
 
