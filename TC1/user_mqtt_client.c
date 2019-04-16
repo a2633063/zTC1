@@ -103,68 +103,71 @@ static uint8_t status = 0;
 void user_mqtt_timer_func( void *arg )
 {
     uint8_t *buf1 = NULL;
-    status++;
-    switch ( status )
+    if ( mico_rtos_is_queue_empty( &mqtt_msg_send_queue ) == true )
     {
-        case 1:
-            user_mqtt_hass_auto_power( );
-            break;
-        case 2:
-            user_mqtt_hass_auto( 0 );
-            break;
-        case 3:
-            user_mqtt_hass_auto( 1 );
-            break;
-        case 4:
-            user_mqtt_hass_auto( 2 );
-            break;
-        case 5:
-            user_mqtt_hass_auto( 3 );
-            break;
-        case 6:
-            user_mqtt_hass_auto( 4 );
-            break;
-        case 7:
-            user_mqtt_hass_auto( 5 );
-            break;
-        case 8:
-            user_mqtt_hass_auto_name( 0 );
-            break;
-        case 9:
-            user_mqtt_hass_auto_name( 1 );
-            break;
-        case 10:
-            user_mqtt_hass_auto_name( 2 );
-            break;
-        case 11:
-            user_mqtt_hass_auto_name( 3 );
-            break;
-        case 12:
-            user_mqtt_hass_auto_name( 4 );
-            break;
-        case 13:
-            user_mqtt_hass_auto_name( 5 );
-            break;
-        case 14:
-            user_mqtt_hass_auto_power_name( );
-            break;
-        case 15:
+        status++;
+        switch ( status )
+        {
+            case 1:
+                user_mqtt_hass_auto_power( );
+                break;
+            case 2:
+                user_mqtt_hass_auto( 0 );
+                break;
+            case 3:
+                user_mqtt_hass_auto( 1 );
+                break;
+            case 4:
+                user_mqtt_hass_auto( 2 );
+                break;
+            case 5:
+                user_mqtt_hass_auto( 3 );
+                break;
+            case 6:
+                user_mqtt_hass_auto( 4 );
+                break;
+            case 7:
+                user_mqtt_hass_auto( 5 );
+                break;
+            case 8:
+                user_mqtt_hass_auto_name( 0 );
+                break;
+            case 9:
+                user_mqtt_hass_auto_name( 1 );
+                break;
+            case 10:
+                user_mqtt_hass_auto_name( 2 );
+                break;
+            case 11:
+                user_mqtt_hass_auto_name( 3 );
+                break;
+            case 12:
+                user_mqtt_hass_auto_name( 4 );
+                break;
+            case 13:
+                user_mqtt_hass_auto_name( 5 );
+                break;
+            case 14:
+                user_mqtt_hass_auto_power_name( );
+                break;
+            case 15:
 
-            buf1 = malloc( 1024 ); //idx为1位时长度为24
-            if ( buf1 != NULL )
-            {
-                sprintf(
-                    buf1,
-                    "{\"mac\":\"%s\",\"version\":null,\"plug_0\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_1\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_2\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_3\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_4\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_5\":{\"on\":null,\"setting\":{\"name\":null}}}",
-                    strMac );
-                user_function_cmd_received( 0, buf1 );
-                free( buf1 );
-            }
-            break;
-        default:
-            mico_stop_timer( &timer_handle );
+                buf1 = malloc( 1024 ); //idx为1位时长度为24
+                if ( buf1 != NULL )
+                {
+                    sprintf(
+                        buf1,
+                        "{\"mac\":\"%s\",\"version\":null,\"plug_0\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_1\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_2\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_3\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_4\":{\"on\":null,\"setting\":{\"name\":null}},\"plug_5\":{\"on\":null,\"setting\":{\"name\":null}}}",
+                        strMac );
+                    user_function_cmd_received( 0, buf1 );
+                    free( buf1 );
+                }
+                break;
+            default:
+                mico_stop_timer( &timer_handle );
 //            mico_deinit_timer( &timer_handle );
-            break;
+                break;
+        }
     }
 }
 
@@ -398,7 +401,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
 
     mqtt_log("Disconnect MQTT client, and reconnect after 5s, reason: mqtt_rc = %d, err = %d", rc, err );
 
-    if (&timer_handle !=NULL && mico_rtos_is_timer_running( &timer_handle ) )
+    if ( &timer_handle != NULL && mico_rtos_is_timer_running( &timer_handle ) )
     {
         mico_stop_timer( &timer_handle );
 //        mico_deinit_timer( &timer_handle );
@@ -622,7 +625,7 @@ void user_mqtt_hass_auto_power_name( void )
         send_buf[16] = 0xe7;
         send_buf[17] = 0x8e;
         send_buf[18] = 0x87;
-        user_mqtt_send_topic( topic_buf, send_buf, 1 );
+        user_mqtt_send_topic( topic_buf, send_buf, 0 );
     }
     if ( send_buf )
         free( send_buf );

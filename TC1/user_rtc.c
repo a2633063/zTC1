@@ -115,6 +115,7 @@ void rtc_thread( mico_thread_arg_t arg )
     LinkStatusTypeDef LinkStatus;
     mico_rtc_time_t rtc_time;
     uint32_t power_last = 0xffffffff;
+    uint32_t total_time_last = 0xffffffff;
 
     mico_utc_time_t utc_time;
     mico_utc_time_t utc_time_last;
@@ -139,12 +140,11 @@ void rtc_thread( mico_thread_arg_t arg )
         mico_time_get_utc_time( &utc_time );
         utc_time += 28800;
 
-        if(utc_time_last!=utc_time)
+        if ( utc_time_last != utc_time )
         {
-            utc_time_last==utc_time;
+            utc_time_last == utc_time;
             total_time++;
         }
-
 
         struct tm * currentTime = localtime( (const time_t *) &utc_time );
         rtc_time.sec = currentTime->tm_sec;
@@ -255,19 +255,19 @@ void rtc_thread( mico_thread_arg_t arg )
         }
 
         //发送功率数据
-        if ( power_last != power )
+        if ( power_last != power || total_time - total_time_last > 4 )
         {
             power_last = power;
-
+            total_time_last = total_time;
             uint8_t *power_buf = NULL;
-            power_buf = malloc( 128 ); //
+            power_buf = malloc( 128 );
             if ( power_buf != NULL )
             {
-                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\",\"total_time\":%d}", strMac, power/10,power%10,total_time );
+                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\",\"total_time\":%d}", strMac, power / 10, power % 10, total_time );
                 user_send( 0, power_buf );
                 free( power_buf );
             }
-            user_mqtt_hass_power();
+            user_mqtt_hass_power( );
         }
 
         mico_rtos_thread_msleep( 900 );
