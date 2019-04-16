@@ -35,9 +35,12 @@ $(NAME)_SOURCES := main.c\
 				   user_mqtt_client.c\
 				   user_ota.c\
 				   user_power.c\
-				   user_function.c
+				   user_function.c\
+				   http_server/app_httpd.c \
+				   http_server/web_data.c
 				   
 $(NAME)_COMPONENTS := protocols/SNTP\
 					protocols/mqtt\
-					utilities/url
+					utilities/url\
+					daemons/http_server
 					

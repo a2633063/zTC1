@@ -7,6 +7,7 @@
 #include "user_power.h"
 #include "user_mqtt_client.h"
 #include "user_function.h"
+#include "http_server/app_httpd.h"
 
 #define os_log(format, ...)  custom_log("TC1", format, ##__VA_ARGS__)
 
@@ -34,6 +35,7 @@ void appRestoreDefault_callback( void * const user_config_data, uint32_t size )
 
     user_config_t* userConfigDefault = user_config_data;
 
+    userConfigDefault->user[0] = 0;
     userConfigDefault->mqtt_ip[0] = 0;
     userConfigDefault->mqtt_port = 0;
     userConfigDefault->mqtt_user[0] = 0;
@@ -128,6 +130,7 @@ int application_start( void )
         sprintf( sys_config->micoSystemConfig.name, ZTC1_NAME, mac1, mac2 );
     }
 
+    os_log( "user:%s",user_config->user );
     os_log( "device name:%s",sys_config->micoSystemConfig.name );
     os_log( "mqtt_ip:%s",user_config->mqtt_ip );
     os_log( "mqtt_port:%d",user_config->mqtt_port );
@@ -155,6 +158,9 @@ int application_start( void )
     err = user_rtc_init( );
     require_noerr( err, exit );
     user_power_init();
+
+    /* start http server thread */
+//      app_httpd_start();
     while ( 1 )
     {
 //        mico_thread_msleep(500);

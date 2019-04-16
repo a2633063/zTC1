@@ -61,6 +61,7 @@ typedef struct
 
     char version;
     user_plug_config_t plug[PLUG_NUM];
+    char user[maxNameLen];
 } user_config_t;
 
 extern char rtc_init;
