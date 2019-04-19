@@ -23,8 +23,22 @@ OSStatus user_sntp_get_time( )
 
     hostent_content = gethostbyname( "pool.ntp.org" );
     pptr = hostent_content->h_addr_list;
-    ipp.s_addr = *(uint32_t *) (*pptr);
+    ipp.s_addr = 0xd248912c;
     err = sntp_get_time( &ipp, &current_time );
+    if ( err != kNoErr )
+    {
+        os_log("sntp_get_time err = %d.", err);
+        ipp.s_addr = *(uint32_t *) (*pptr);
+        err = sntp_get_time( &ipp, &current_time );
+    }
+    if ( err != kNoErr )
+    {
+        os_log("sntp_get_time0 err = %d.", err);
+        hostent_content = gethostbyname( "cn.ntp.org.cn" );
+        pptr = hostent_content->h_addr_list;
+        ipp.s_addr = *(uint32_t *) (*pptr);
+        err = sntp_get_time( &ipp, &current_time );
+    }
     if ( err != kNoErr )
     {
         os_log("sntp_get_time1 err = %d.", err);
