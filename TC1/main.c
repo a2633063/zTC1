@@ -75,6 +75,8 @@ int application_start( void )
     int i;
     os_log( "Start %s",VERSION );
 
+    uint8_t main_num=0;
+    uint32_t power_last = 0xffffffff;
     OSStatus err = kNoErr;
 
 //    for ( i = 0; i < Relay_NUM; i++ )
@@ -163,13 +165,24 @@ int application_start( void )
 //      app_httpd_start();
     while ( 1 )
     {
-//        mico_thread_msleep(500);
-//        MicoGpioOutputTrigger(MICO_GPIO_5);
-//        mico_gpio_output_toggle( MICO_SYS_LED );
-//        mico_rtos_delay_milliseconds(1000);
-//        uint32_t a=mico_nanosecond_clock_value();
-//        os_log("nano=%lu",a/1000);
-//        mico_rtos_delay_milliseconds(1000);
+        main_num++;
+        //发送功率数据
+        if ( power_last != power || main_num>4 )
+        {
+            power_last = power;
+            main_num =0;
+            uint8_t *power_buf = NULL;
+            power_buf = malloc( 128 );
+            if ( power_buf != NULL )
+            {
+                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\",\"total_time\":%d}", strMac, power / 10, power % 10, total_time );
+                user_send( 0, power_buf );
+                free( power_buf );
+            }
+            user_mqtt_hass_power( );
+        }
+        mico_thread_msleep(1000);
+
     }
     exit:
     os_log("application_start ERROR!");

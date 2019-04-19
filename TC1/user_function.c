@@ -16,10 +16,8 @@ void user_function_set_last_time( )
     last_time = UpTicks( );
 }
 
-
-
 bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend );
-bool json_plug_task_analysis(unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend );
+bool json_plug_task_analysis( unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend );
 
 void user_send( int udp_flag, char *s )
 {
@@ -84,6 +82,25 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
             os_log("version:%s",VERSION);
             cJSON_AddStringToObject( json_send, "version", VERSION );
         }
+        //解析运行时间
+        cJSON *p_total_time = cJSON_GetObjectItem( pJsonRoot, "total_time" );
+        if ( p_total_time )
+        {
+            cJSON_AddNumberToObject( json_send, "total_time", total_time );
+        }
+        //解析功率
+        cJSON *p_power = cJSON_GetObjectItem( pJsonRoot, "power" );
+        if ( p_power )
+        {
+            uint8_t *temp_buf = malloc( 16 );
+            if ( temp_buf != NULL )
+            {
+                sprintf( temp_buf, "%d.%d", power / 10, power % 10 );
+                cJSON_AddStringToObject( json_send, "power", temp_buf );
+                free( temp_buf );
+            }
+            os_log("power:%d",power);
+        }
         //解析主机setting-----------------------------------------------------------------
         cJSON *p_setting = cJSON_GetObjectItem( pJsonRoot, "setting" );
         if ( p_setting )
@@ -137,7 +154,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
                 sprintf( user_config->mqtt_password, p_mqtt_password->valuestring );
             }
 
-
             //开发返回数据
             //返回设备ota
             if ( p_ota ) cJSON_AddStringToObject( json_setting_send, "ota", p_ota->valuestring );
@@ -164,7 +180,6 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         }
 
         cJSON_AddStringToObject( json_send, "name", sys_config->micoSystemConfig.name );
-
 
         if ( return_flag == true )
         {
@@ -216,7 +231,7 @@ bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON
                 user_relay_set( x, p_plug_on->valueint );
                 return_flag = true;
             }
-            user_mqtt_send_plug_state(x);
+            user_mqtt_send_plug_state( x );
         }
 
         //解析plug中setting项目----------------------------------------------
@@ -232,7 +247,7 @@ bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON
                 {
                     return_flag = true;
                     sprintf( user_config->plug[x].name, p_plug_setting_name->valuestring );
-                    user_mqtt_hass_auto(x);
+                    user_mqtt_hass_auto( x );
                 }
                 cJSON_AddStringToObject( json_plug_setting_send, "name", user_config->plug[x].name );
             }

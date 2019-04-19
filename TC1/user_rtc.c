@@ -114,8 +114,7 @@ void rtc_thread( mico_thread_arg_t arg )
     OSStatus err = kUnknownErr;
     LinkStatusTypeDef LinkStatus;
     mico_rtc_time_t rtc_time;
-    uint32_t power_last = 0xffffffff;
-    uint32_t total_time_last = 0xffffffff;
+
 
     mico_utc_time_t utc_time;
     mico_utc_time_t utc_time_last;
@@ -127,6 +126,7 @@ void rtc_thread( mico_thread_arg_t arg )
             err = user_sntp_get_time( );
             if ( err == kNoErr )
             {
+                os_log("sntp success!");
                 rtc_init = 1;
                 break;
             }
@@ -254,21 +254,7 @@ void rtc_thread( mico_thread_arg_t arg )
             }
         }
 
-        //发送功率数据
-        if ( power_last != power || total_time - total_time_last > 4 )
-        {
-            power_last = power;
-            total_time_last = total_time;
-            uint8_t *power_buf = NULL;
-            power_buf = malloc( 128 );
-            if ( power_buf != NULL )
-            {
-                sprintf( power_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\",\"total_time\":%d}", strMac, power / 10, power % 10, total_time );
-                user_send( 0, power_buf );
-                free( power_buf );
-            }
-            user_mqtt_hass_power( );
-        }
+
 
         mico_rtos_thread_msleep( 900 );
     }
