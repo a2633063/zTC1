@@ -75,6 +75,14 @@ void user_function_cmd_received( int udp_flag, uint8_t *pusrdata )
         cJSON *json_send = cJSON_CreateObject( );
         cJSON_AddStringToObject( json_send, "mac", strMac );
 
+        //解析重启命令
+//        cJSON *p_cmd = cJSON_GetObjectItem( pJsonRoot, "name" );
+        if(p_cmd && cJSON_IsString( p_cmd ) && strcmp( p_cmd->valuestring, "restart" ) == 0)
+        {
+            os_log("cmd:restart");
+            mico_system_power_perform( mico_system_context_get( ), eState_Software_Reset );
+        }
+
         //解析版本
         cJSON *p_version = cJSON_GetObjectItem( pJsonRoot, "version" );
         if ( p_version )
@@ -247,7 +255,7 @@ bool json_plug_analysis( int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON
                 {
                     return_flag = true;
                     sprintf( user_config->plug[x].name, p_plug_setting_name->valuestring );
-                    user_mqtt_hass_auto( x );
+                    user_mqtt_hass_auto_name( x );
                 }
                 cJSON_AddStringToObject( json_plug_setting_send, "name", user_config->plug[x].name );
             }

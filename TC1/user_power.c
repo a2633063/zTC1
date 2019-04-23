@@ -24,7 +24,7 @@ static void power_timer_handler( void* arg )
     {
         timer = (clock_count - clock_count_last);
 
-    os_log("power_irq_handler:%09u %u %u",timer,timer_irq_count,timer_count);
+//    os_log("power_irq_handler:%09u %u %u",timer,timer_irq_count,timer_count);
         if ( timer_count > 3 )
         {
             timer /= 1000;

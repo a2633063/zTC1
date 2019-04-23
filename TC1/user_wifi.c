@@ -34,7 +34,7 @@ void wifi_start_easylink( )
     micoWlanStartEasyLink( 20000 );
     user_led_set( 1 );
 }
-uint32_t ip = 0xd248912c;
+
 //easylink 完成回调
 void wifi_easylink_completed_handle( network_InitTypeDef_st *nwkpara, void * arg )
 {

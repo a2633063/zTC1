@@ -99,14 +99,22 @@ char topic_state[MAX_MQTT_TOPIC_SIZE];
 char topic_set[MAX_MQTT_TOPIC_SIZE];
 
 mico_timer_t timer_handle;
-static uint8_t status = 0;
+static uint8_t timer_status = 0;
 void user_mqtt_timer_func( void *arg )
 {
     uint8_t *buf1 = NULL;
+
+    LinkStatusTypeDef LinkStatus;
+    micoWlanGetLinkStatus( &LinkStatus );
+    if ( LinkStatus.is_connected != 1 )
+    {
+        mico_stop_timer( &timer_handle );
+        return;
+    }
     if ( mico_rtos_is_queue_empty( &mqtt_msg_send_queue ) == true )
     {
-        status++;
-        switch ( status )
+        timer_status++;
+        switch ( timer_status )
         {
             case 1:
                 user_mqtt_hass_auto_power( );
@@ -401,11 +409,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
 
     mqtt_log("Disconnect MQTT client, and reconnect after 5s, reason: mqtt_rc = %d, err = %d", rc, err );
 
-    if ( &timer_handle != NULL && mico_rtos_is_timer_running( &timer_handle ) )
-    {
-        mico_stop_timer( &timer_handle );
-//        mico_deinit_timer( &timer_handle );
-    }
+    timer_status=100;
 
     mqtt_client_release( &c, &n );
     isconnect = false;
@@ -428,11 +432,7 @@ static void messageArrived( MessageData* md )
     OSStatus err = kUnknownErr;
     p_mqtt_recv_msg_t p_recv_msg = NULL;
     MQTTMessage* message = md->message;
-    /*
-     app_log("MQTT messageArrived callback: topiclen=[%d][%s],\t payloadlen=[%d][%s]",md->topicName->lenstring.len,
-     md->topicName->lenstring.data,(int)message->payloadlen,(char*)message->payload);
-     */
-//    mqtt_log("======MQTT received callback ![%d]======", MicoGetMemoryInfo()->free_memory );
+
     p_recv_msg = (p_mqtt_recv_msg_t) calloc( 1, sizeof(mqtt_recv_msg_t) );
     require_action( p_recv_msg, exit, err = kNoMemoryErr );
 
