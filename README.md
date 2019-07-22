@@ -58,6 +58,10 @@
 - [x] app实时显示功率
 - [ ] ~~根据功率自动开关~~(未做此功能)
 
+后续计划及当期正在处理的见[TodoProject](https://github.com/a2633063/zTC1/projects/1)
+
+
+
 <img src="https://raw.githubusercontent.com/wiki/a2633063/zTC1/image/Phicomm_TC1.png" width="540">
 
 
