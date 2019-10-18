@@ -191,6 +191,11 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 ### 文档更新日志
 
+**2019年10月10日**
+
+更新文档适用于v1.0.2版本固件:通信协议、homeassistant接入
+
+
 **2019年9月23日17:18:10**
 
 更新文档适用于v1.0.0版本固件:开始使用、通信协议、homeassistant接入
