@@ -90,6 +90,8 @@
 
 ​	[通信协议](#通信协议)
 
+​	[FAQ](#FAQ)
+
 [文档更新日志](#文档更新日志)
 
 
@@ -188,13 +190,21 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 
 
+### FAQ
+
+见 [FAQ](https://github.com/a2633063/SmartControl_Android_MQTT/wiki/FAQ)
+
+
 
 ### 文档更新日志
+
+**20191224**
+
+增加FAQ跳转链接
 
 **2019年10月10日**
 
 更新文档适用于v1.0.2版本固件:通信协议、homeassistant接入
-
 
 **2019年9月23日17:18:10**
 
