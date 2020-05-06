@@ -1,6 +1,8 @@
 # zTC1 a1版
 **斐讯TC1智能排插个人固件.**
 
+github无法打开查看的可在gitee查看:https://gitee.com/a2633063/zTC1
+
 排插TC1因为服务器关闭,无法使用.
 
 为此,开发供自己使用的FW及对应app,确保自己能够正常使用此排插.取名为zTC1.
@@ -62,7 +64,7 @@
 
 
 
-<img src="https://raw.githubusercontent.com/wiki/a2633063/zTC1/image/Phicomm_TC1.png" width="540">
+<img src="https://cdn.jsdelivr.net/gh/a2633063/Image/zTC1/Phicomm_TC1.png" width="540">
 
 
 
@@ -119,13 +121,13 @@
 
 硬件版本在外包装底部,如图所示:
 
-![hardware_version](https://raw.githubusercontent.com/a2633063/zTC1/master/README/hardware_version.png)
+![hardware_version](https://cdn.jsdelivr.net/gh/a2633063/Image/zTC1/hardware_version.png)
 
 如果没有包装,只能[拆开](#拆机接线及烧录固件相关)分辨,如图,左侧为不支持的a2版本,右侧为支持的a1版本
 
-![a1_a2](https://raw.githubusercontent.com/a2633063/zTC1/master/README/a1_a2.png)
 
 
+![a1_a2](https://cdn.jsdelivr.net/gh/a2633063/Image/zTC1/a1_a2.png)
 
 ## 开始
 
@@ -197,6 +199,10 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 
 
 ### 文档更新日志
+
+**20200506**
+
+修改文档图库地址
 
 **20191224**
 
