@@ -197,6 +197,10 @@ TC1使用的主控为EMW3031,基于MiCO(MCU based Internet Connectivity Operatin
 见 [FAQ](https://github.com/a2633063/SmartControl_Android_MQTT/wiki/FAQ)
 
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/a2633063/zTC1.svg)](https://starchart.cc/a2633063/zTC1)
+
 
 ### 文档更新日志
 
